@@ -34,7 +34,7 @@ def webhook():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     user_id = event.source.user_id
-    print("対象のユーザからメッセージを受信しました。ユーザID : {user_id}")
+    print(f"対象のユーザからメッセージを受信しました。ユーザID : {user_id}")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
