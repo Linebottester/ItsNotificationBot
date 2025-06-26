@@ -70,7 +70,7 @@ def handle_message(event):
         print("メッセージ処理エラー:", e)
 
 # 全てのイベントをキャッチするハンドラー（デバッグ用）
-@handler.default
+@handler.default()
 def default_handler(event):
     print("=== DEFAULT HANDLER ===")
     print("デフォルトハンドラーが呼び出されました")
