@@ -25,7 +25,7 @@ def webhook():
     
     return "OK"
 
-@handeler.add(MessageEvent, message=TextMessage)
+@handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     user_id = event.source.user_id
     print("対象のユーザからメッセージを受信しました。ユーザID : {user_id}")
