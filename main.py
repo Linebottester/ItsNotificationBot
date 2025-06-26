@@ -24,8 +24,10 @@ def webhook():
 
     try:
         handler.handle(body, signature)
+        print("アクセス成功")
     except InvalidSignatureError:
         abort(400)
+        print("アクセス失敗")
     
     return "OK"
 
