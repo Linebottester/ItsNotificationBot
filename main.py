@@ -2,7 +2,8 @@ from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
-
+from dotenv import load_dotenv
+load_dotenv()
 
 import os
 
@@ -12,6 +13,9 @@ app = Flask(__name__)
 # 環境変数からアクセストークンとシークレットを取得
 line_bot_api = LineBotApi(os.getenv("LINE_CHANNEL_ACCESS_TOKEN"))
 handler = WebhookHandler(os.getenv("LINE_CHANNEL_SECRET"))
+
+# アクセストークンの確認
+print("TOKEN:", os.getenv("LINE_CHANNEL_ACCESS_TOKEN"))
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
