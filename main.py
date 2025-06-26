@@ -7,6 +7,11 @@ load_dotenv()
 
 import os
 import json
+import logging
+
+# ログ設定
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
@@ -15,8 +20,8 @@ line_bot_api = LineBotApi(os.getenv("LINE_CHANNEL_ACCESS_TOKEN"))
 handler = WebhookHandler(os.getenv("LINE_CHANNEL_SECRET"))
 
 # アクセストークンの確認
-print("TOKEN:", os.getenv("LINE_CHANNEL_ACCESS_TOKEN"))
-print("SECRET:", os.getenv("LINE_CHANNEL_SECRET"))
+logger.info(f"TOKEN: {os.getenv('LINE_CHANNEL_ACCESS_TOKEN')}")
+logger.info(f"SECRET: {os.getenv('LINE_CHANNEL_SECRET')}")
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -24,39 +29,39 @@ def webhook():
     body = request.get_data(as_text=True)
     
     # デバッグ情報を追加
-    print("=== WEBHOOK DEBUG ===")
-    print("受信ボディ:", body)
-    print("署名:", signature)
+    logger.info("=== WEBHOOK DEBUG ===")
+    logger.info(f"受信ボディ: {body}")
+    logger.info(f"署名: {signature}")
     
     # JSONとしてパース可能かチェック
     try:
         body_json = json.loads(body)
-        print("パースされたJSON:", json.dumps(body_json, indent=2, ensure_ascii=False))
+        logger.info(f"パースされたJSON: {json.dumps(body_json, indent=2, ensure_ascii=False)}")
     except json.JSONDecodeError as e:
-        print("JSON解析エラー:", e)
+        logger.error(f"JSON解析エラー: {e}")
 
     try:
         handler.handle(body, signature)
-        print("ハンドラー処理成功")
+        logger.info("ハンドラー処理成功")
     except InvalidSignatureError:
-        print("署名検証失敗")
+        logger.error("署名検証失敗")
         abort(400)
     except Exception as e:
-        print("ハンドラーエラー:", e)
+        logger.error(f"ハンドラーエラー: {e}")
         abort(500)
     
     return "OK"
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    print("=== MESSAGE EVENT HANDLER ===")
-    print("イベントハンドラーが呼び出されました")
+    logger.info("=== MESSAGE EVENT HANDLER ===")
+    logger.info("イベントハンドラーが呼び出されました")
     
     try:
         user_id = event.source.user_id
         user_message = event.message.text
-        print(f"ユーザーID: {user_id}")
-        print(f"メッセージ: {user_message}")
+        logger.info(f"ユーザーID: {user_id}")
+        logger.info(f"メッセージ: {user_message}")
         
         # 返信を送信
         reply_message = f"受信しました：{user_message}"
@@ -64,20 +69,20 @@ def handle_message(event):
             event.reply_token,
             TextSendMessage(text=reply_message)
         )
-        print("返信送信完了")
+        logger.info("返信送信完了")
         
     except Exception as e:
-        print("メッセージ処理エラー:", e)
+        logger.error(f"メッセージ処理エラー: {e}")
 
 # 全てのイベントをキャッチするハンドラー（デバッグ用）
 @handler.default()
 def default_handler(event):
-    print("=== DEFAULT HANDLER ===")
-    print("デフォルトハンドラーが呼び出されました")
-    print("イベントタイプ:", type(event))
-    print("イベント内容:", event)
+    logger.info("=== DEFAULT HANDLER ===")
+    logger.info("デフォルトハンドラーが呼び出されました")
+    logger.info(f"イベントタイプ: {type(event)}")
+    logger.info(f"イベント内容: {event}")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    print(f"サーバー起動中... ポート: {port}")
+    logger.info(f"サーバー起動中... ポート: {port}")
     app.run(host="0.0.0.0", port=port, debug=True)
