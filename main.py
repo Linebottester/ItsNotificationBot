@@ -19,7 +19,7 @@ print("TOKEN:", os.getenv("LINE_CHANNEL_ACCESS_TOKEN"))
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    signature = request.handlers["X-Line-Signature"]
+    signature = request.headers["X-Line-Signature"]
     body = request.get_data(as_text=True)
 
     try:
