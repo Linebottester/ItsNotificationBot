@@ -21,20 +21,20 @@ print("TOKEN:", os.getenv("LINE_CHANNEL_ACCESS_TOKEN"))
 def webhook():
     signature = request.headers["X-Line-Signature"]
     body = request.get_data(as_text=True)
+    print("受信ボディ", body)
 
     try:
         handler.handle(body, signature)
         print("アクセス成功")
     except InvalidSignatureError:
+        print("署名検証失敗")
         abort(400)
-        print("アクセス失敗")
-    
     return "OK"
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     user_id = event.source.user_id
-    print(f"対象のユーザからメッセージを受信しました。ユーザID : {user_id}")
+    print(f"メッセージを受信： from user_id: {user_id}")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
