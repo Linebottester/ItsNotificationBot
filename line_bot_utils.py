@@ -79,7 +79,6 @@ def handle_follow(event):
     except Exception as e:
         logger.error(f"フォロー処理エラー: {e}")
 
-# Render用のポート設定
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+
+
+

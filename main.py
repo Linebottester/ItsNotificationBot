@@ -30,10 +30,10 @@ def main():
     for wished_facility in wished_facilities:
         #　施設を限定してスクレイピングをおこなう
         scrape_avl_from_calender(facility_id=wished_facility["id"], facility_name=wished_facility["facility_name"])
-   
-   # LINE Botサーバー起動
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
 
 if __name__ == "__main__":
     main()
+
+# LINE Botサーバー起動
+port = int(os.environ.get("PORT", 5000))
+app.run(host="0.0.0.0", port=port, debug=False)
