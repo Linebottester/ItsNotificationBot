@@ -4,6 +4,8 @@ from scraper import scrape_facility_names_ids
 from scraper import scrape_avl_from_calender
 from db_utils import save_facilities
 from db_utils import fetch_wished_facilities
+from line_bot_utils import app, line_bot_api, handler
+import os
 import logging
 
 # ロガー設定
@@ -28,6 +30,10 @@ def main():
     for wished_facility in wished_facilities:
         #　施設を限定してスクレイピングをおこなう
         scrape_avl_from_calender(facility_id=wished_facility["id"], facility_name=wished_facility["facility_name"])
-    
+   
+   # LINE Botサーバー起動
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
+
 if __name__ == "__main__":
     main()
