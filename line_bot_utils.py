@@ -32,6 +32,11 @@ handler = WebhookHandler(channel_secret)
 logger.info(f"TOKEN: {channel_access_token}")
 logger.info(f"SECRET: {channel_secret}")
 
+# Renderのルート確認用（ヘルスチェック用途）
+@app.route("/", methods=["GET"])
+def index():
+    return "LINE Bot is running!", 200
+
 # webhookからリクエストが来たときの受け口
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -78,6 +83,11 @@ def handle_follow(event):
 
     except Exception as e:
         logger.error(f"フォロー処理エラー: {e}")
+
+# Flaskアプリ起動
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
 
 
 
