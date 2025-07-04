@@ -5,6 +5,7 @@ from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import FollowEvent
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
+from db_utils import save_followed_userid
 from dotenv import load_dotenv
 import os
 import json
@@ -74,12 +75,14 @@ def handle_follow(event):
         logger.info(f"ユーザーID: {user_id}")
 
         reply_message = "フォローありがとうございます！UserIDを取得しました😊"
-        ###ここに実際はユーザから希望する日程、施設名を質問させるようにすべきか####
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=reply_message)
         )
         logger.info("フォロー返信送信完了")
+        ###ここに実際はユーザから希望する日程、施設名を質問させるようなやりとりにすべきか####
+
+        save_followed_userid(user_id)
 
     except Exception as e:
         logger.error(f"フォロー処理エラー: {e}")
