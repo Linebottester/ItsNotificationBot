@@ -188,14 +188,11 @@ def save_userid_to_localdb(db_name="facility_data.db"):
         conn = sqlite3.connect(db_path) 
         cursor = conn.cursor()
 
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                user_id TEXT PRIMARY KEY
-            )
-        ''')
-
         for row in data:
-            cursor.execute("INSERT OR REPLACE INTO users (user_id) VALUES (?)", (row[0],))
+            cursor.execute(
+                "INSERT OR REPLACE INTO users (id, user_id, joined_at) VALUES (?, ?, ?)",
+                (row[0], row[1], row[2])
+            )
 
         conn.commit()
         conn.close()

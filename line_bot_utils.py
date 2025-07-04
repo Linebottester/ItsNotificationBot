@@ -76,25 +76,37 @@ def handle_follow(event):
         user_id = event.source.user_id
         logger.info(f"ユーザーID: {user_id}")
 
-        reply_message = "フォローありがとうございます！UserIDを取得しました😊"
+        reply_message = "フォローありがとうございます！\nUserIDを取得しました😊\n通知登録したいときは「希望」と入力してください。"
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=reply_message)
         )
         logger.info("フォロー返信送信完了")
-        ###ここに実際はユーザから希望する日程、施設名を質問させるようなやりとりにすべきか####
 
         save_followed_userid(user_id)
 
     except Exception as e:
         logger.error(f"フォロー処理エラー: {e}")
 
+@handler.add(MessageEvent, message=TextMessage)
+def handle_text(event):
+    text = event.message.text.strip()
+
+    if text == "希望":
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(
+                text="ご希望の施設名と日程を教えてください。\n例：「ホテル何とか 7月20日」"
+            )
+        )
+
+
 @app.route('/api/latest_data', methods=['GET'])
 def get_latest_data():
     DB_PATH = '/opt/render/project/src/facility_data.db'
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users") 
+    cursor.execute("SELECT user_id FROM users") 
     rows = cursor.fetchall()
     conn.close()
     return jsonify(rows)
