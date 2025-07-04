@@ -129,24 +129,35 @@ def parse_and_save_avl(soup, facility_id, db_name="facility_data.db"):
 def save_followed_userid(userid, db_name="facility_data.db"):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base_dir, db_name)
-
+    
+    # デバッグ用ログ追加
+    logger.info(f"DBパス: {db_path}")
+    logger.info(f"DBファイル存在確認: {os.path.exists(db_path)}")
+    
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     try:
-        # INSERT OR IGNORE による挿入
         cursor.execute('''
             INSERT OR IGNORE INTO users (user_id)
             VALUES (?)
         ''', (userid,))
+        
+        # 実際に挿入されたかを確認
+        affected_rows = cursor.rowcount
+        logger.info(f"挿入された行数: {affected_rows}")
+        
         conn.commit()
         logger.info(f"フォローしてくれたユーザのID:{userid} を保存しました。")
+        
+        # 確認用クエリ
+        cursor.execute("SELECT COUNT(*) FROM users WHERE user_id = ?", (userid,))
+        count = cursor.fetchone()[0]
+        logger.info(f"DBに保存されているか確認: {count}件")
 
     except sqlite3.Error as e:
         logger.error(f"DBエラー:{e}")
-        return []
     
     finally:
         conn.close()
-
     
