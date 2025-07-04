@@ -1,12 +1,14 @@
 # line_bot_utils
 
-from flask import Flask, request, abort
+from flask import Flask, request, abort, jsonify
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import FollowEvent
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 from db_utils import save_followed_userid
 from dotenv import load_dotenv
+import requests
+import sqlite3
 import os
 import json
 import logging
@@ -86,6 +88,17 @@ def handle_follow(event):
 
     except Exception as e:
         logger.error(f"フォロー処理エラー: {e}")
+
+@app.route('/api/latest_data', methods=['GET'])
+def get_latest_data():
+    DB_PATH = '/opt/render/project/src/facility_data.db'
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM user_id")  # 必要に応じてフィルター
+    rows = cursor.fetchall()
+    conn.close()
+    return jsonify(rows)
+
 
 # Flaskアプリ起動
 if __name__ == "__main__":
