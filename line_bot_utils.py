@@ -94,7 +94,7 @@ def get_latest_data():
     DB_PATH = '/opt/render/project/src/facility_data.db'
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM user_id")  # 必要に応じてフィルター
+    cursor.execute("SELECT * FROM users") 
     rows = cursor.fetchall()
     conn.close()
     return jsonify(rows)
