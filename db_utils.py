@@ -1,6 +1,7 @@
 # db_utils.py
 
 from datetime import datetime
+import requests
 import sqlite3
 import os 
 import logging
@@ -170,4 +171,41 @@ def save_followed_userid(userid, db_name="facility_data.db"):
     
     finally:
         conn.close()
-    
+        
+def save_userid_to_localdb(db_name="facility_data.db"):
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(base_dir, db_name)
+
+    try:
+        response = requests.get('https://itsnotificationbot.onrender.com/api/latest_data')
+        logger.info(f"API ステータス: {response.status_code}")
+        logger.debug(f"APIレスポンス本文: {response.text}")
+
+        if response.status_code == 200:
+            data = response.json()
+
+            conn = sqlite3.connect('local.db')
+            cursor = conn.cursor()
+
+            # テーブルがなければ作成
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS users (
+                    user_id TEXT PRIMARY KEY
+                )
+            ''')
+            logger.info("ローカルDB 'users' テーブル確認完了")
+
+            count_inserted = 0
+            for row in data:
+                cursor.execute("INSERT OR REPLACE INTO users (user_id) VALUES (?)", (row[0],))
+                count_inserted += 1
+
+            conn.commit()
+            conn.close()
+            logger.info(f"ローカルDBに {count_inserted} 件の user_id を保存しました")
+
+        else:
+            logger.error("APIリクエストに失敗しました")
+
+    except Exception as e:
+        logger.exception(f"ローカルDB保存処理中に例外が発生しました: {e}")

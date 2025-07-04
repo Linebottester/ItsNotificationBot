@@ -4,6 +4,7 @@ from scraper import scrape_facility_names_ids
 from scraper import scrape_avl_from_calender
 from db_utils import save_facilities
 from db_utils import fetch_wished_facilities
+from db_utils import save_userid_to_localdb
 from line_bot_utils import app, line_bot_api, handler
 import os
 import logging
@@ -33,22 +34,7 @@ def main():
         #　施設を限定してスクレイピングをおこなう
         scrape_avl_from_calender(facility_id=wished_facility["id"], facility_name=wished_facility["facility_name"])
    
-   ##動作確認できたらdb_utilsに切り出す##
-    response = requests.get('https://itsnotificationbot.onrender.com/api/latest_data')
-
-    print(f"Status: {response.status_code}")
-    print(f"Body: {response.text}")  # ←中身がないorエラーメッセージか確認
-
-
-    data = response.json()
-
-    conn = sqlite3.connect('local.db')
-    cursor = conn.cursor()
-    for row in data:
-        cursor.execute("INSERT OR REPLACE INTO availability VALUES (?, ?, ?, ...)", row)
-    conn.commit()
-    conn.close()
-    ##動作確認できたらdb_utilsに切り出す##
+    save_userid_to_localdb()
 
 
 if __name__ == "__main__":
