@@ -138,7 +138,7 @@ def save_followed_userid(userid, db_name="facility_data.db"):
         cursor.execute('''
             INSERT OR IGNORE INTO users (user_id)
             VALUES (?)
-        ''', (userid))
+        ''', (userid,))
         conn.commit()
         logger.info(f"フォローしてくれたユーザのID:{userid} を保存しました。")
 
