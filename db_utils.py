@@ -138,6 +138,16 @@ def save_followed_userid(userid, db_name="facility_data.db"):
     cursor = conn.cursor()
 
     try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+
+        # usersテーブルがなければ作成
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                user_id TEXT PRIMARY KEY
+            )
+        ''')
+
         cursor.execute('''
             INSERT OR IGNORE INTO users (user_id)
             VALUES (?)

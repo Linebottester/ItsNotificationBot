@@ -7,6 +7,8 @@ from db_utils import fetch_wished_facilities
 from line_bot_utils import app, line_bot_api, handler
 import os
 import logging
+import requests
+import sqlite3
 
 # ロガー設定
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -30,7 +32,24 @@ def main():
     for wished_facility in wished_facilities:
         #　施設を限定してスクレイピングをおこなう
         scrape_avl_from_calender(facility_id=wished_facility["id"], facility_name=wished_facility["facility_name"])
-        
+   
+   ##動作確認できたらdb_utilsに切り出す##
+    response = requests.get('https://itsnotificationbot.onrender.com/api/latest_data')
+
+    print(f"Status: {response.status_code}")
+    print(f"Body: {response.text}")  # ←中身がないorエラーメッセージか確認
+
+
+    data = response.json()
+
+    conn = sqlite3.connect('local.db')
+    cursor = conn.cursor()
+    for row in data:
+        cursor.execute("INSERT OR REPLACE INTO availability VALUES (?, ?, ?, ...)", row)
+    conn.commit()
+    conn.close()
+    ##動作確認できたらdb_utilsに切り出す##
+
 
 if __name__ == "__main__":
     main()
