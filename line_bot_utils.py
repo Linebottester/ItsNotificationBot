@@ -7,6 +7,7 @@ from linebot.models import FollowEvent
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, FlexSendMessage
 from db_utils import save_followed_userid
 from db_utils import get_items_from_db
+from db_utils import register_user_selection
 from dotenv import load_dotenv
 import requests
 import sqlite3

@@ -203,17 +203,33 @@ def save_userid_to_localdb(db_name="facility_data.db"):
 
 def get_items_from_db():
     """SQLiteからデータを取得"""
-    conn = sqlite3.connect('your_database.db')
+    conn = sqlite3.connect('facility_data.db')
     cursor = conn.cursor()
     
     # テーブルからデータを取得（例：商品テーブル）
-    cursor.execute("SELECT id, name, description FROM products ORDER BY name")
+    cursor.execute("SELECT name, description FROM facilities ORDER BY name")
     items = cursor.fetchall()
     
     conn.close()
     
     # 辞書形式に変換
     return [{'id': item[0], 'name': item[1]} for item in items]
+
+def register_user_selection(user_id, item_id):
+    conn = sqlite3.connect('facility_data.db')
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO user_wishes (user_id, facility_id)
+            VALUES (?, ?)
+            ON CONFLICT(user_id, facility_id) DO NOTHING
+        """, (user_id, item_id))
+        conn.commit()
+    except sqlite3.Error as e:
+        logger.error(f"登録失敗: {user_id}, {item_id} - {e}")
+    finally:
+        conn.close()
+
 
 
 
