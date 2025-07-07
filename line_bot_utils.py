@@ -4,10 +4,21 @@ from flask import Flask, request, abort, jsonify
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import FollowEvent
-from linebot.models import MessageEvent, TextMessage, TextSendMessage, FlexSendMessage, PostbackEvent
+from linebot.models import  TextMessage, TextSendMessage, FlexSendMessage, PostbackEvent, PostbackAction
+from linebot.models import (
+    MessageEvent,
+    TextMessage,
+    TextSendMessage,
+    FlexSendMessage,
+    QuickReply,
+    QuickReplyButton,
+    PostbackAction
+)
+
 from db_utils import save_followed_userid
 from db_utils import get_items_from_db
 from db_utils import register_user_selection
+from datetime import date, datetime, timedelta
 from dotenv import load_dotenv
 import requests
 import sqlite3
@@ -149,20 +160,54 @@ def show_selection_flex():
     )
 
 # Postback受信時の処理
+@handler.add(PostbackEvent)
+def on_postback(event):
+    data = event.postback.data
+
+    if data.startswith("select_date_"):from datetime import date, timedelta
+
+# ユーザーごとの一時記憶（本番ではDBやRedisが望ましい）
+temporary_selection = {}
+
+@handler.add(PostbackEvent)
 def handle_postback(event):
-    if event.postback.data.startswith("select_item_"):
-        item_id = event.postback.data.replace("select_item_", "")
+    data = event.postback.data
+    user_id = event.source.user_id
 
-        # メッセージを返信
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=f"施設が選択されました！")
+    if data.startswith("select_item_"):
+        item_id = data.replace("select_item_", "")
+        temporary_selection[user_id] = item_id
+
+        today = date.today()
+        reply_options = []
+        for offset in range(0, 5):
+            day = today + timedelta(days=offset * 7)
+            label = day.strftime("%-m月%-d日")
+            reply_options.append(QuickReplyButton(
+                action=PostbackAction(label=label, data=f"select_date_{day.isoformat()}")
+            ))
+
+        message = TextSendMessage(
+            text="いつ希望しますか？",
+            quick_reply=QuickReply(items=reply_options)
         )
+        line_bot_api.reply_message(event.reply_token, message)
 
-        # ユーザーの選択を登録
-        register_user_selection(event.source.user_id, item_id)
+    elif data.startswith("select_date_"):
+        wish_date = data.replace("select_date_", "")
+        facility_id = temporary_selection.get(user_id)
 
-
+        if facility_id:
+            register_user_selection(user_id, facility_id, wish_date)
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text=f"{wish_date} に希望を登録しました！")
+            )
+        else:
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text="施設情報が見つかりませんでした。")
+            )
 
 # Flaskアプリ起動
 if __name__ == "__main__":

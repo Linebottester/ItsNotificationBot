@@ -224,6 +224,10 @@ def register_user_selection(user_id, item_id):
             VALUES (?, ?)
             ON CONFLICT(user_id, facility_id) DO NOTHING
         """, (user_id, item_id))
+
+        temporary_selection[user_id] = facility_id  #　一度保持する
+        
+
         conn.commit()
     except sqlite3.Error as e:
         logger.error(f"登録失敗: {user_id}, {item_id} - {e}")
