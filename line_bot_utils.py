@@ -4,7 +4,7 @@ from flask import Flask, request, abort, jsonify
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import FollowEvent
-from linebot.models import MessageEvent, TextMessage, TextSendMessage, FlexSendMessage
+from linebot.models import MessageEvent, TextMessage, TextSendMessage, FlexSendMessage, PostbackEvent
 from db_utils import save_followed_userid
 from db_utils import get_items_from_db
 from db_utils import register_user_selection
@@ -107,6 +107,11 @@ def get_latest_data():
     rows = cursor.fetchall()
     conn.close()
     return jsonify(rows)
+
+@handler.add(PostbackEvent)
+def on_postback(event):
+    handle_postback(event)
+
 
 # Flex Messageでリストを表示しユーザに選択させる
 def show_selection_flex():
