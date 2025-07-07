@@ -121,6 +121,8 @@ def handle_text(event):
 
         if parsed_date >= today:
             facility_id = temporary_selection.get(user_id)
+            logger.info(f"[確認] user_id: {user_id}, facility_id: {facility_id}, wish_date: {parsed_date.isoformat()}")
+
             if facility_id:
                 register_user_selection(user_id, facility_id, parsed_date.isoformat())
                 reply = f"{parsed_date.strftime('%-m月%-d日')} に希望を登録しました！"
