@@ -207,7 +207,7 @@ def get_items_from_db():
     cursor = conn.cursor()
     
     # テーブルからデータを取得（例：商品テーブル）
-    cursor.execute("SELECT id , name, description FROM facilities ORDER BY name")
+    cursor.execute("SELECT id , name FROM facilities ORDER BY name")
     items = cursor.fetchall()
     
     conn.close()
