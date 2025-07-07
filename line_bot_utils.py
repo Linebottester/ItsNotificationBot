@@ -26,6 +26,8 @@ import os
 import json
 import logging
 
+temporary_selection = {}
+
 # ログ設定
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -186,18 +188,10 @@ def show_selection_flex():
         }
     )
 
-# Postback受信時の処理
-@handler.add(PostbackEvent)
-def on_postback(event):
-    data = event.postback.data
-
-    if data.startswith("select_date_"):from datetime import date, timedelta
-
-# ユーザーごとの一時記憶（本番ではDBやRedisが望ましい）
-temporary_selection = {}
-
 @handler.add(PostbackEvent)
 def handle_postback(event):
+    from datetime import date, timedelta  # ← モジュールは関数内でなくファイル先頭へ！
+    
     data = event.postback.data
     user_id = event.source.user_id
 
@@ -208,7 +202,7 @@ def handle_postback(event):
         today = date.today()
         reply_options = []
         for offset in range(0, 5):
-            day = today + timedelta(days=offset * 7)
+            day = today + timedelta(days=offset)  # ← 修正：毎日表示したいなら *7 は不要
             label = day.strftime("%-m月%-d日")
             reply_options.append(QuickReplyButton(
                 action=PostbackAction(label=label, data=f"select_date_{day.isoformat()}")
