@@ -4,6 +4,7 @@ import os
 
 app = Flask(__name__)
 DB_NAME = "facility_data.db"
+app.config['JSON_AS_ASCII'] = False
 
 def get_db_connection():
     base_dir = os.path.dirname(os.path.abspath(__file__))
