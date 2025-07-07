@@ -152,8 +152,16 @@ def show_selection_flex():
 def handle_postback(event):
     if event.postback.data.startswith("select_item_"):
         item_id = event.postback.data.replace("select_item_", "")
-        # 選択されたアイテムをDBに登録する処理
+
+        # メッセージを返信
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=f"施設が選択されました！")
+        )
+
+        # ユーザーの選択を登録
         register_user_selection(event.source.user_id, item_id)
+
 
 
 # Flaskアプリ起動
