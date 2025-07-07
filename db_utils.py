@@ -215,22 +215,18 @@ def get_items_from_db():
     # 辞書形式に変換
     return [{'id': item[0], 'name': item[1]} for item in items]
 
-def register_user_selection(user_id, item_id):
+def register_user_selection(user_id, facility_id, wish_date):
     conn = sqlite3.connect('facility_data.db')
     cursor = conn.cursor()
     try:
         cursor.execute("""
-            INSERT INTO user_wishes (user_id, facility_id)
-            VALUES (?, ?)
-            ON CONFLICT(user_id, facility_id) DO NOTHING
-        """, (user_id, item_id))
-
-        temporary_selection[user_id] = facility_id  #　一度保持する
-        
-
+            INSERT INTO user_wishes (user_id, facility_id, wish_date)
+            VALUES (?, ?, ?)
+            ON CONFLICT(user_id, facility_id) DO UPDATE SET wish_date = excluded.wish_date
+        """, (user_id, facility_id, wish_date))
         conn.commit()
     except sqlite3.Error as e:
-        logger.error(f"登録失敗: {user_id}, {item_id} - {e}")
+        logger.error(f"登録失敗: {user_id}, {facility_id}, {wish_date} - {e}")
     finally:
         conn.close()
 

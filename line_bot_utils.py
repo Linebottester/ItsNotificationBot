@@ -103,11 +103,39 @@ def handle_follow(event):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_text(event):
+    user_id = event.source.user_id
     text = event.message.text.strip()
 
-    if event.message.text == "希望":
+    # 「希望」と入力されたら施設選択メニューを送信
+    if text == "希望":
         flex_message = show_selection_flex()
         line_bot_api.reply_message(event.reply_token, flex_message)
+        return
+    
+    # 日付入力判定
+    try:
+        from datetime import datetime, date
+
+        parsed_date = datetime.strptime(text, "%m月%d日").date()
+        parsed_date = parsed_date.replace(year=date.today().year)
+
+        today = date.today()
+        end_date = date(today.year, 9, 30)
+
+        if today <= parsed_date <= end_date:
+            facility_id = temporary_selection.get(user_id)
+            if facility_id:
+                register_user_selection(user_id, facility_id, parsed_date.isoformat())
+                reply = f"{parsed_date.strftime('%-m月%-d日')} に希望を登録しました！"
+            else:
+                reply = "施設が未選択のようです。もう一度「希望」と入力してください。"
+        else:
+            reply = "指定できるのは今日から翌々月の最終日までの日付です。"
+
+    except ValueError:
+        reply = "日付の形式が正しくありません。\n例：「8月15日」のように入力してください。"
+
+    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply))
 
 @app.route('/api/latest_data', methods=['GET'])
 def get_latest_data():
