@@ -109,7 +109,7 @@ def get_latest_data():
     return jsonify(rows)
 
 # Flex Messageでリストを表示しユーザに選択させる
-def show_selection_flex(items):
+def show_selection_flex():
     items = get_items_from_db()
 
     contents = []
