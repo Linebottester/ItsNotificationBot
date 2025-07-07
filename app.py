@@ -29,12 +29,12 @@ def list_tables():
     finally:
         conn.close()
 
-@app.route("/table/users")
-def show_table_users(users):
+@app.route("/table/<table_name>")
+def show_table_contents(table_name):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute(f"SELECT * FROM {users}")
+        cursor.execute(f"SELECT * FROM {table_name}")
         rows = cursor.fetchall()
         result = [dict(row) for row in rows]
         return jsonify({"data": result})
