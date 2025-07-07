@@ -216,6 +216,9 @@ def get_items_from_db():
     return [{'id': item[0], 'name': item[1]} for item in items]
 
 def register_user_selection(user_id, facility_id, wish_date):
+    logger.info(f"[登録処理開始] user_id={user_id}, facility_id={facility_id}, wish_date={wish_date}")
+    logger.info(f"[DB接続確認] facility_data.db 実パス: {os.path.abspath('facility_data.db')}")
+
     conn = sqlite3.connect('facility_data.db')
     cursor = conn.cursor()
     try:
@@ -225,11 +228,9 @@ def register_user_selection(user_id, facility_id, wish_date):
             ON CONFLICT(user_id, facility_id) DO UPDATE SET wish_date = excluded.wish_date
         """, (user_id, facility_id, wish_date))
         conn.commit()
+        logger.info(f"[登録成功] {user_id=} に {facility_id=} を {wish_date=} で登録")
     except sqlite3.Error as e:
-        logger.error(f"登録失敗: {user_id}, {facility_id}, {wish_date} - {e}")
+        logger.error(f"[登録失敗] {user_id=}, {facility_id=}, {wish_date=} - エラー内容: {e}")
     finally:
         conn.close()
-
-
-
-
+        logger.info("[DB接続終了]")
