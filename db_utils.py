@@ -201,3 +201,19 @@ def save_userid_to_localdb(db_name="facility_data.db"):
     else:
         logger.error("APIリクエストに失敗しました")
 
+def get_items_from_db():
+    """SQLiteからデータを取得"""
+    conn = sqlite3.connect('your_database.db')
+    cursor = conn.cursor()
+    
+    # テーブルからデータを取得（例：商品テーブル）
+    cursor.execute("SELECT id, name, description FROM products ORDER BY name")
+    items = cursor.fetchall()
+    
+    conn.close()
+    
+    # 辞書形式に変換
+    return [{'id': item[0], 'name': item[1]} for item in items]
+
+
+

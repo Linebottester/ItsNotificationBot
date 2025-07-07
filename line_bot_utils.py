@@ -4,8 +4,9 @@ from flask import Flask, request, abort, jsonify
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import FollowEvent
-from linebot.models import MessageEvent, TextMessage, TextSendMessage
+from linebot.models import MessageEvent, TextMessage, TextSendMessage, FlexSendMessage
 from db_utils import save_followed_userid
+from db_utils import get_items_from_db
 from dotenv import load_dotenv
 import requests
 import sqlite3
@@ -92,14 +93,9 @@ def handle_follow(event):
 def handle_text(event):
     text = event.message.text.strip()
 
-    if text == "希望":
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(
-                text="ご希望の施設名と日程を教えてください。\n例：「ホテル何とか 7月20日」"
-            )
-        )
-
+    if event.message.text == "希望":
+        flex_message = show_selection_flex()
+        line_bot_api.reply_message(event.reply_token, flex_message)
 
 @app.route('/api/latest_data', methods=['GET'])
 def get_latest_data():
@@ -110,6 +106,48 @@ def get_latest_data():
     rows = cursor.fetchall()
     conn.close()
     return jsonify(rows)
+
+# Flex Messageでリストを表示しユーザに選択させる
+def show_selection_flex(items):
+    items = get_items_from_db()
+
+    contents = []
+    for item in items:
+        contents.append({
+            "type": "button",
+            "action": {
+                "type": "postback",
+                "label": item['name'],
+                "data": f"select_item_{item['id']}"
+            },
+            "style": "secondary"
+        })
+    
+    return FlexSendMessage(
+        alt_text="選択してください",
+        contents={
+            "type": "bubble",
+            "body": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                    {
+                        "type": "text",
+                        "text": "項目を選択してください",
+                        "weight": "bold",
+                        "size": "lg"
+                    }
+                ] + contents
+            }
+        }
+    )
+
+# Postback受信時の処理
+def handle_postback(event):
+    if event.postback.data.startswith("select_item_"):
+        item_id = event.postback.data.replace("select_item_", "")
+        # 選択されたアイテムをDBに登録する処理
+        register_user_selection(event.source.user_id, item_id)
 
 
 # Flaskアプリ起動
