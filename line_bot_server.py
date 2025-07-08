@@ -17,10 +17,10 @@ from db_utils import (
     register_user_selection
 )
 
+import threading
 import time
 import os
 import logging
-import json
 import sqlite3
 
 # Flask アプリ作成
@@ -40,7 +40,7 @@ if not channel_access_token or not channel_secret:
 line_bot_api = LineBotApi(channel_access_token)
 handler = WebhookHandler(channel_secret)
 
-temporary_selection = {}
+temporary_selection = {} #　希望入力時、一時的に記憶するための変数
 
 # SQLite DB 接続関数
 def get_db_connection(db_name="facility_data.db"):
@@ -203,6 +203,8 @@ def show_selection_flex():
             }
         }
     )
+# 定期実行スレッドの起動
+threading.Thread(target=periodic_check, daemon=True).start()
 
 # Flask起動
 if __name__ == "__main__":
