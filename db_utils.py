@@ -20,6 +20,14 @@ def save_facilities(facilities, db_name="facility_data.db"):
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
 
+        # 🚧 テーブルが存在しない場合に作成
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS facilities (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL
+            );
+        ''')
+
         for facility in facilities:
             try:
                 cursor.execute('''
@@ -29,7 +37,7 @@ def save_facilities(facilities, db_name="facility_data.db"):
                 ''', (facility['id'], facility['name']))
                 logger.info(f"保存完了: {facility['name']} (ID={facility['id']})")
             except sqlite3.Error as e:
-                    logger.error(f"保存失敗: {facility['id']} - {e}")
+                logger.error(f"保存失敗: {facility['id']} - {e}")
 
         conn.commit()
         logger.info('すべての施設情報を保存しました')
