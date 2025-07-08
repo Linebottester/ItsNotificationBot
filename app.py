@@ -5,9 +5,11 @@ import os
 app = Flask(__name__)
 DB_NAME = "facility_data.db"
 
-def get_db_connection():
+def get_db_connection(db_name="facility_data.db"):
+
     base_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base_dir, DB_NAME)
+    
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
@@ -17,7 +19,11 @@ def index():
     return jsonify({"message": "SQLiteテーブル確認APIへようこそ。"})
 
 @app.route("/tables")
-def list_tables():
+def list_tables(db_name="facility_data.db"):
+
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(base_dir, db_name)
+    
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -30,7 +36,10 @@ def list_tables():
         conn.close()
 
 @app.route("/table/<table_name>")
-def show_table_contents(table_name):
+def show_table_contents(table_name, db_name="facility_data.db"):
+
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(base_dir, db_name)
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
