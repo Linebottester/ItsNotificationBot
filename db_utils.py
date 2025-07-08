@@ -171,35 +171,6 @@ def save_followed_userid(userid, db_name="facility_data.db"):
     
     finally:
         conn.close()
-        
-def save_userid_to_localdb(db_name="facility_data.db"):
-
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    db_path = os.path.join(base_dir, db_name)
-
-    response = requests.get('https://itsnotificationbot.onrender.com/api/latest_data')
-
-    logger.info(f"API ステータス: {response.status_code}")
-    logger.debug(f"レスポンス本文: {response.text}")
-
-    if response.status_code == 200:
-        data = response.json()
-
-        conn = sqlite3.connect(db_path) 
-        cursor = conn.cursor()
-
-        for row in data:
-            cursor.execute(
-                "INSERT OR REPLACE INTO users (id, user_id, joined_at) VALUES (?, ?, ?)",
-                (row[0], row[1], row[2])
-            )
-
-        conn.commit()
-        conn.close()
-        logger.info(f"ローカルDB '{db_name}' に {len(data)} 件の user_id を保存しました")
-
-    else:
-        logger.error("APIリクエストに失敗しました")
 
 def get_items_from_db():
     """SQLiteからデータを取得"""

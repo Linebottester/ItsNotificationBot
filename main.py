@@ -33,9 +33,6 @@ def main():
     for wished_facility in wished_facilities:
         #　施設を限定してスクレイピングをおこなう
         scrape_avl_from_calender(facility_id=wished_facility["id"], facility_name=wished_facility["facility_name"])
-   
-    save_userid_to_localdb()
-
 
 if __name__ == "__main__":
     main()
