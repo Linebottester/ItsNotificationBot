@@ -195,26 +195,48 @@ def get_items_from_db():
     return [{'id': item[0], 'name': item[1]} for item in items]
 
 def register_user_selection(user_id, facility_id, wish_date, db_name="facility_data.db"):
-    logger.info(f"[絶対パス確認] {os.path.abspath('facility_data.db')}")
+    logger.info(f"[絶対パス確認] {os.path.abspath(db_name)}")
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base_dir, db_name)
 
     logger.info(f"[登録処理開始] user_id={user_id}, facility_id={facility_id}, wish_date={wish_date}")
-    logger.info(f"[DB接続確認] facility_data.db 実パス: {os.path.abspath('facility_data.db')}")
+    logger.info(f"[DB接続確認] facility_data.db 実パス: {db_path}")
 
-    conn = sqlite3.connect(db_path) 
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
+
     try:
+        # 外部キー制約を有効化（もし参照先がある場合）
+        cursor.execute("PRAGMA foreign_keys = ON;")
+
+        # テーブル作成を最初に明示しておく
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS user_wishes (
+                user_id TEXT NOT NULL,
+                facility_id TEXT NOT NULL,
+                wish_date DATE NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (user_id, facility_id),
+                FOREIGN KEY (user_id) REFERENCES users(user_id),
+                FOREIGN KEY (facility_id) REFERENCES facilities(id)
+            );
+        """)
+        conn.commit()  # ←テーブル作成を確実に反映
+
+        # 登録処理
         cursor.execute("""
             INSERT INTO user_wishes (user_id, facility_id, wish_date)
             VALUES (?, ?, ?)
             ON CONFLICT(user_id, facility_id) DO UPDATE SET wish_date = excluded.wish_date
         """, (user_id, facility_id, wish_date))
         conn.commit()
+
         logger.info(f"[登録成功] {user_id=} に {facility_id=} を {wish_date=} で登録")
+
     except sqlite3.Error as e:
         logger.error(f"[登録失敗] {user_id=}, {facility_id=}, {wish_date=} - エラー内容: {e}")
+
     finally:
         conn.close()
         logger.info("[DB接続終了]")

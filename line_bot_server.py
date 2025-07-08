@@ -22,14 +22,14 @@ import logging
 import json
 import sqlite3
 
-# ✅ Flask アプリ作成
+# Flask アプリ作成
 app = Flask(__name__)
 
-# ✅ ログ設定
+# ログ設定
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
-# ✅ LINE Bot 認証情報
+# LINE Bot 認証情報
 load_dotenv()
 channel_access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
 channel_secret = os.getenv("LINE_CHANNEL_SECRET")
@@ -41,7 +41,7 @@ handler = WebhookHandler(channel_secret)
 
 temporary_selection = {}
 
-# ✅ SQLite DB 接続関数
+# SQLite DB 接続関数
 def get_db_connection(db_name="facility_data.db"):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base_dir, db_name)
@@ -50,12 +50,12 @@ def get_db_connection(db_name="facility_data.db"):
     conn.row_factory = sqlite3.Row
     return conn
 
-# ✅ 共通エンドポイント：ヘルスチェック
+# 共通エンドポイント：ヘルスチェック
 @app.route("/", methods=["GET"])
 def index():
     return jsonify({"message": "LINE Bot & DB API が稼働中です！"})
 
-# ✅ DB管理エンドポイント群
+# DB管理エンドポイント群
 @app.route("/tables")
 def list_tables():
     try:
@@ -82,7 +82,7 @@ def show_table_contents(table_name):
     finally:
         conn.close()
 
-# ✅ LINE Webhook 受信
+# LINE Webhook 受信
 @app.route("/webhook", methods=["POST"])
 def webhook():
     signature = request.headers.get("X-Line-Signature")
@@ -98,7 +98,7 @@ def webhook():
         logger.error(f"[Webhook] ハンドラーエラー: {e}")
         return "Error", 500
 
-# ✅ LINE Botイベントハンドラ
+# LINE Botイベントハンドラ
 @handler.add(FollowEvent)
 def handle_follow(event):
     user_id = event.source.user_id
@@ -164,7 +164,7 @@ def handle_postback(event):
             line_bot_api.reply_message(event.reply_token,
                 TextSendMessage(text="施設情報が見つかりませんでした。"))
 
-# ✅ Flex Message生成
+# Flex Message生成
 def show_selection_flex():
     items = get_items_from_db()
     contents = [{
@@ -191,7 +191,7 @@ def show_selection_flex():
         }
     )
 
-# ✅ Flask起動
+# Flask起動
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)

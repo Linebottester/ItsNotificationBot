@@ -4,7 +4,6 @@ from flask import Flask, request, abort, jsonify
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import FollowEvent
-from linebot.models import  TextMessage, TextSendMessage, FlexSendMessage, PostbackEvent, PostbackAction
 from linebot.models import (
     MessageEvent,
     TextMessage,
@@ -12,6 +11,7 @@ from linebot.models import (
     FlexSendMessage,
     QuickReply,
     QuickReplyButton,
+    PostbackEvent,
     PostbackAction
 )
 
