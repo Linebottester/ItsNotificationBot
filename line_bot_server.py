@@ -3,7 +3,7 @@
 from flask import Flask, request, jsonify, abort
 from datetime import datetime, date, timedelta
 from dotenv import load_dotenv
-
+from main import main
 from linebot import LineBotApi, WebhookHandler
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
@@ -17,6 +17,7 @@ from db_utils import (
     register_user_selection
 )
 
+import time
 import os
 import logging
 import json
@@ -49,6 +50,18 @@ def get_db_connection(db_name="facility_data.db"):
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
+
+# main.py定期実行用関数
+def periodic_check():
+    while True:
+        try:
+            main()  # ← これで定期実行される！
+            print("定期スクレイピングが実行されました")
+        except Exception as e:
+            print(f"定期処理エラー: {e}")
+        # time.sleep(8 * 60 * 60)  # 8時間待つ
+        time.sleep(60)  # 60秒待つ（テスト用）
+
 
 # 共通エンドポイント：ヘルスチェック
 @app.route("/", methods=["GET"])
