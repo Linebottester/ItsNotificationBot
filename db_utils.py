@@ -216,6 +216,7 @@ def get_items_from_db():
     return [{'id': item[0], 'name': item[1]} for item in items]
 
 def register_user_selection(user_id, facility_id, wish_date, db_name="facility_data.db"):
+    logger.info(f"[絶対パス確認] {os.path.abspath('facility_data.db')}")
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base_dir, db_name)
