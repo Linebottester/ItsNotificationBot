@@ -215,11 +215,15 @@ def get_items_from_db():
     # 辞書形式に変換
     return [{'id': item[0], 'name': item[1]} for item in items]
 
-def register_user_selection(user_id, facility_id, wish_date):
+def register_user_selection(user_id, facility_id, wish_date, db_name="facility_data.db"):
+
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(base_dir, db_name)
+
     logger.info(f"[登録処理開始] user_id={user_id}, facility_id={facility_id}, wish_date={wish_date}")
     logger.info(f"[DB接続確認] facility_data.db 実パス: {os.path.abspath('facility_data.db')}")
 
-    conn = sqlite3.connect('facility_data.db')
+    conn = sqlite3.connect(db_path) 
     cursor = conn.cursor()
     try:
         cursor.execute("""
