@@ -1,14 +1,20 @@
 from flask import Flask, jsonify
+import logging
 import sqlite3
 import os
 
+# logger 設定
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__)
-DB_NAME = "facility_data.db"
 
 def get_db_connection(db_name="facility_data.db"):
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    db_path = os.path.join(base_dir, DB_NAME)
+    db_path = os.path.join(base_dir, db_name)
+    logger.info(f"[DB接続処理] 接続先パス: {db_path}")
+
     
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
@@ -23,7 +29,7 @@ def list_tables(db_name="facility_data.db"):
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base_dir, db_name)
-    
+
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
