@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from datetime import datetime
 import logging
 import sqlite3
 import os
@@ -57,6 +58,19 @@ def show_table_contents(table_name, db_name="facility_data.db"):
         return jsonify({"error": str(e)})
     finally:
         conn.close()
+
+@app.route("/check_db_timestamp")
+def check_db_timestamp():
+    db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "facility_data.db")
+    try:
+        modified_time = os.path.getmtime(db_path)
+        timestamp = datetime.fromtimestamp(modified_time)
+        logger.info(f"[DBタイムスタンプ] 最終更新: {timestamp}")
+        return jsonify({"last_modified": timestamp.isoformat()})
+    except Exception as e:
+        logger.error(f"[DB確認エラー] {e}")
+        return jsonify({"error": str(e)})
+
         
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

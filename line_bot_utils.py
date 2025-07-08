@@ -190,7 +190,6 @@ def show_selection_flex():
 
 @handler.add(PostbackEvent)
 def handle_postback(event):
-    from datetime import date, timedelta  # ← モジュールは関数内でなくファイル先頭へ！
     
     data = event.postback.data
     user_id = event.source.user_id
@@ -202,7 +201,7 @@ def handle_postback(event):
         today = date.today()
         reply_options = []
         for offset in range(0, 5):
-            day = today + timedelta(days=offset)  # ← 修正：毎日表示したいなら *7 は不要
+            day = today + timedelta(days=offset) 
             label = day.strftime("%-m月%-d日")
             reply_options.append(QuickReplyButton(
                 action=PostbackAction(label=label, data=f"select_date_{day.isoformat()}")
