@@ -1,0 +1,29 @@
+name: Run main.py manually and periodically
+
+on:
+  workflow_dispatch:   # 手動実行ボタン用
+  schedule:
+    - cron: '0 */8 * * *'   # 8時間ごと（UTC）
+
+jobs:
+  run-main:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run main.py
+        env:
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_CHANNEL_SECRET: ${{ secrets.LINE_CHANNEL_SECRET }}
+        run: python main.py
