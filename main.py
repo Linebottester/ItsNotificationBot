@@ -4,7 +4,6 @@ from scraper import scrape_facility_names_ids
 from scraper import scrape_avl_from_calender
 from db_utils import save_facilities
 from db_utils import fetch_wished_facilities
-from db_utils import save_userid_to_localdb
 from line_bot_utils import app, line_bot_api, handler
 import os
 import logging
