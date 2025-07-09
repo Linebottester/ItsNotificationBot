@@ -59,7 +59,7 @@ def fetch_wished_facilities(db_name="facility_data.db"):
 
     try:
         #希望のある施設名user_wishesから取得する
-        cursor.execute("SELECT DISTINCT facility_name FROM user_wishes;")
+        cursor.execute("SELECT DISTINCT facility_id FROM user_wishes;")
         wished_names = [row[0] for row in cursor.fetchall()]
 
         if not wished_names:
