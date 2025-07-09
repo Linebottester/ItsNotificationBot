@@ -104,6 +104,17 @@ def parse_and_save_avl(soup, facility_id, db_name="facility_data.db"):
             status_text = status_icon.get_text(strip=True)
             if status_text != "☓":  # ☓は除外する（満室）
                 join_date = td["data-join-time"]
+
+                # データ検知時、テーブルがなかったら作成する
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS facility_availabilities (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        facility_id TEXT NOT NULL,
+                        date TEXT NOT NULL,
+                        status TEXT,
+                        UNIQUE(facility_id, date)
+                    )
+                ''')
                 
                 # 挿入前にレコード数を確認（重複チェック用）
                 cursor.execute('''
