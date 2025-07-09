@@ -57,12 +57,12 @@ def scrape_avl_from_calender(facility_id, facility_name): # avl=availabilityの�
         # base_url = "https://as.its-kenpo.or.jp/apply/empty_calendar" # 本番用
         # https://as.its-kenpo.or.jp/apply/calendar3 # こちらでは認証ページに遷移してしまう
 
-        # Urlの変数部分を定義する　パラメータがすべて空だと保養施設の案内ページに行く
-        params = {
-            's': facility_id, #　各施設のID（と思しき変数）
-            'join_date': first_day,#'2025-07-01', # スクレイピングを行う月を指定する,空の時は今月を見に行くようだ
-            'night_count':'' # 泊数をしているようだが効いていないように見える
-        }
+        # Urlの変数部分を定義する　パラメータがすべて空だと保養施設の案内ページに行く # テスト時はずす
+        # params = {
+            # 's': facility_id, #　各施設のID（と思しき変数）# テスト時はずす
+            # 'join_date': first_day,#'2025-07-01', # スクレイピングを行う月を指定する,空の時は今月を見に行くようだ
+            #'night_count':'' # 泊数をしているようだが効いていないように見える
+        # }
 
         # 施設ID例
         # s=PUlqTjMwRFpwWlNaMUpIZDlrSGR3MVda 草津温泉　ホテルヴィレッジ
