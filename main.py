@@ -16,10 +16,10 @@ logger = logging.getLogger(__name__)
 
 def main():
     logging.basicConfig(level=logging.INFO)
-
     
-    # 施設の名前とURL一覧を取得 
-    facility_url = "https://as.its-kenpo.or.jp/apply/empty_calendar?s=PT13TjJjVFBrbG1KbFZuYzAxVFp5Vkhkd0YyWWZWR2JuOTJiblpTWjFKSGQ5a0hkdzFXWg%3D%3D&join_date=&night_count=1"
+    # 施設の名前とURL一覧を取得
+    facility_url = "https://linebottester.github.io/kenpo_test_site/test_calendar.html" # テスト用
+    # facility_url = "https://as.its-kenpo.or.jp/apply/empty_calendar?s=PT13TjJjVFBrbG1KbFZuYzAxVFp5Vkhkd0YyWWZWR2JuOTJiblpTWjFKSGQ5a0hkdzFXWg%3D%3D&join_date=&night_count=1"
     
     # 施設名と施設IDを取得する　毎回見に行くのはナンセンスな気がする　月初めのみに限定すべきか
     facilities = scrape_facility_names_ids(facility_url)

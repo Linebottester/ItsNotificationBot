@@ -1,5 +1,7 @@
 # db_utils.py
 
+from line_bot_server import notify_user
+from db_utils import get_wished_user
 from datetime import datetime
 import requests
 import sqlite3
@@ -11,6 +13,7 @@ import json
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
+# main.pyが起動するたびfacilitiesにスクレイピングし更新
 def save_facilities(facilities, db_name="facility_data.db"):
     logger.info(f'保存対象の施設数:{len(facilities)}')
     try:
@@ -47,6 +50,7 @@ def save_facilities(facilities, db_name="facility_data.db"):
     finally:
         conn.close()
 
+# スクレイピング時に、希望者のいる施設のみ限定するためにuser_wishesを参照する
 def fetch_wished_facilities(db_name="facility_data.db"):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base_dir, db_name)
@@ -85,6 +89,7 @@ def fetch_wished_facilities(db_name="facility_data.db"):
 
     return [row[0] for row in rows]
 
+# スクレイピングしたデータから施設の予約可否情報を抽出してfacility_availabilitiesテーブルに入れる
 def parse_and_save_avl(soup, facility_id, db_name="facility_data.db"):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base_dir, db_name)
@@ -123,6 +128,10 @@ def parse_and_save_avl(soup, facility_id, db_name="facility_data.db"):
                 if after_count > before_count:
                     logging.info(f"空きあり: {facility_id} {join_date} 状態: {status_text}")
                     count += 1
+
+                    for user_id in get_wished_user(facility_id):
+                        notify_user(user_id, f"{join_date} に {facility_id} の空きが出ました！")
+                        logging.info(f"通知 → user={user_id}, facility={facility_id}, date={join_date}")
                     
                     # line_utils.py（仮）に関数を配置して通知を送るようにする
 
@@ -135,6 +144,7 @@ def parse_and_save_avl(soup, facility_id, db_name="facility_data.db"):
     conn.close()
     logger.info(f"{facility_id} の空きデータ {count} 件を保存しました。")
 
+# ユーザーがボットをフォローしたときそのIDをusersテーブルに保存
 def save_followed_userid(userid, db_name="facility_data.db"):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base_dir, db_name)
@@ -180,6 +190,7 @@ def save_followed_userid(userid, db_name="facility_data.db"):
     finally:
         conn.close()
 
+# ボットに希望とメッセージしたuserにfacilitiesテーブルの内容を渡す
 def get_items_from_db():
     """SQLiteからデータを取得"""
     conn = sqlite3.connect('facility_data.db')
@@ -194,6 +205,7 @@ def get_items_from_db():
     # 辞書形式に変換
     return [{'id': item[0], 'name': item[1]} for item in items]
 
+# ユーザー希望する施設と日程を入力したときそれをuser_wishesにIDと紐づけて保存
 def register_user_selection(user_id, facility_id, wish_date, db_name="facility_data.db"):
     logger.info(f"[絶対パス確認] {os.path.abspath(db_name)}")
 
@@ -240,3 +252,15 @@ def register_user_selection(user_id, facility_id, wish_date, db_name="facility_d
     finally:
         conn.close()
         logger.info("[DB接続終了]")
+
+# 施設の空きが検知されたら対象の施設のIDを受け取って希望者のIDを返す
+def get_wished_user(facility_id, db_name="facility_data.db"):
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(base_dir, db_name)
+
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT user_id FROM user_wishes WHERE facility_id = ?", (facility_id,))
+    results = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    return results

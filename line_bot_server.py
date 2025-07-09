@@ -60,7 +60,7 @@ def periodic_check():
         except Exception as e:
             print(f"定期処理エラー: {e}")
         # time.sleep(8 * 60 * 60)  # 8時間待つ
-        time.sleep(60)  # 60秒待つ（テスト用）
+        time.sleep(180)  # 60秒待つ（テスト用）
 
 
 # 共通エンドポイント：ヘルスチェック
@@ -203,6 +203,11 @@ def show_selection_flex():
             }
         }
     )
+
+def notify_user(user_id: str, message: str):
+    line_bot_api = LineBotApi(os.getenv("LINE_CHANNEL_ACCESS_TOKEN"))
+    line_bot_api.push_message(user_id, TextSendMessage(text=message))
+
 # 定期実行スレッドの起動
 threading.Thread(target=periodic_check, daemon=True).start()
 
