@@ -1,11 +1,9 @@
 # db_utils.py
 
 from datetime import datetime
-import requests
 import sqlite3
 import os 
 import logging
-import json
 
 # logger 設定
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -50,9 +48,7 @@ def save_facilities(facilities, db_name="facility_data.db"):
 
 # スクレイピング時に、希望者のいる施設のみ限定するためにuser_wishesを参照する
 def fetch_wished_facilities(db_name="facility_data.db"):
-    import os
-    import sqlite3
-    import logging
+    
 
     logger = logging.getLogger(__name__)
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -71,6 +67,8 @@ def fetch_wished_facilities(db_name="facility_data.db"):
         ''')
 
         rows = cursor.fetchall()
+        logger.info(f"JOIN結果: {len(rows)} 件取得")
+
         if not rows:
             logger.info("希望される施設がありません")
             return []
