@@ -19,7 +19,7 @@ def save_facilities(facilities, db_name="facility_data.db"):
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
 
-        # 🚧 テーブルが存在しない場合に作成
+        # テーブルが存在しない場合に作成
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS facilities (
                 id TEXT PRIMARY KEY,
@@ -49,7 +49,6 @@ def save_facilities(facilities, db_name="facility_data.db"):
 # スクレイピング時に、希望者のいる施設のみ限定するためにuser_wishesを参照する
 def fetch_wished_facilities(db_name="facility_data.db"):
     
-
     logger = logging.getLogger(__name__)
     base_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base_dir, db_name)
@@ -78,7 +77,7 @@ def fetch_wished_facilities(db_name="facility_data.db"):
                 "user_id": row["user_id"],
                 "facility_id": row["facility_id"],
                 "facility_name": row["facility_name"],
-                "wish_date": row["wish_date"]  # ← このまま使うかは通知条件次第
+                "wish_date": row["wish_date"]  
             }
             for row in rows
         ]
@@ -145,13 +144,11 @@ def parse_and_save_avl(soup, facility_id, db_name="facility_data.db"):
                     for user_id in get_wished_user(facility_id, join_date):
                         notify_user(user_id, f"あなたの希望している施設の予約に空きが出ました！")
                         logging.info(f"通知 → user={user_id}, facility={facility_id}, date={join_date}")
-                    
-                    # line_utils.py（仮）に関数を配置して通知を送るようにする
 
                 else:
                     logging.info(f"既に登録済み: {facility_id} {join_date} ")
 
-                # 通知したfacility_availabilitiesデータはnotice_logテーブルへ移行させて元テーブルから消す（？）
+                # !!!!通知したfacility_availabilitiesデータは元テーブルから消すべき（？）!!!!!
 
     conn.commit()
     conn.close()

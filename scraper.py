@@ -44,6 +44,7 @@ def scrape_facility_names_ids(url):
 
 def scrape_avl_from_calender(facility_id, facility_name, user_id, wish_date): # avl=availabilityの略　綴りミスが多いため
     logger.info(f"[関数呼び出し] scrape_avl_from_calender → facility_id={facility_id}, name={facility_name}, user_id={user_id}, wish_date={wish_date}")
+    
     # 今月、翌月、翌々月の３回転する
     today = datetime.now()
     base_date = today.replace(day=1)
@@ -55,7 +56,7 @@ def scrape_avl_from_calender(facility_id, facility_name, user_id, wish_date): # 
 
         logger.info(f"[{facility_name}] {target_year}年{target_month}月 スクレイピング開始")
 
-        base_url = "https://linebottester.github.io/kenpo_test_site/test_calendar.html" # test用
+        base_url = "https://linebottester.github.io/kenpo_test_site/test_calendar.html" # !!!!!test用!!!!!
         # base_url = "https://as.its-kenpo.or.jp/apply/empty_calendar" # 本番用
         # https://as.its-kenpo.or.jp/apply/calendar3 # こちらでは認証ページに遷移してしまう
 
@@ -72,7 +73,7 @@ def scrape_avl_from_calender(facility_id, facility_name, user_id, wish_date): # 
         # s=PUF6TjMwRFpwWlNaMUpIZDlrSGR3MVda ホテルハーヴェスト南紀田辺
 
         try:
-            response = requests.get(base_url) # test用
+            response = requests.get(base_url) #!!!!! test用 !!!!!
             #response = requests.get(base_url, params=params) #本番用
             response.raise_for_status()
             logger.info(f"{target_year}年{target_month}月の施設名:{facility_name}, 施設ID:{facility_id}に対するページ取得成功")

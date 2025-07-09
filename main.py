@@ -19,14 +19,15 @@ def main():
     
 
     # 施設名と施設IDを取得する　毎回見に行くのはナンセンスな気がする　月初めのみに限定すべきか
-    #　if count0or1over == 0 or datetime.today().day == 1:　#　例えばこんな感じとか
+    #　if isfirst == 0 or datetime.today().day == 1:　#　例えばこんな感じとか
 
     facilities = scrape_facility_names_ids(facility_url)
     save_facilities(facilities) #取得してきた施設と施設IDをDBへ保存
 
-    # 希望されている施設IDと名前をDBから取得
+    # 希望されている施設IDと名前をDBから取得してきて
     wished_facilities = fetch_wished_facilities()
 
+    # 希望のある施設のみをスクレイピングする
     for wished_facility in wished_facilities:
         scrape_avl_from_calender(
             facility_id=wished_facility["facility_id"],
@@ -34,6 +35,6 @@ def main():
             user_id=wished_facility["user_id"],              
             wish_date=wished_facility["wish_date"]           
         )
-    # count0or1over = 1 # 初回か否かの判定に用いる
+    # isfirst = 1 # 初回か否かの判定に用いる
 if __name__ == "__main__":
     main()
