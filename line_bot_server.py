@@ -1,14 +1,14 @@
 #line_bot_server.py
 
 from flask import Flask, request, jsonify
-from datetime import datetime, date, timedelta, relativedelta, calendar
+from datetime import datetime, date
+from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
 from main import main
 from linebot import LineBotApi, WebhookHandler
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
-    FlexSendMessage, QuickReply, QuickReplyButton,
-    PostbackEvent, PostbackAction, FollowEvent
+    FlexSendMessage, PostbackEvent, FollowEvent
 )
 from linebot.exceptions import InvalidSignatureError
 
@@ -22,6 +22,7 @@ import time
 import os
 import logging
 import sqlite3
+import calendar
 
 # Flask アプリ作成
 app = Flask(__name__)
