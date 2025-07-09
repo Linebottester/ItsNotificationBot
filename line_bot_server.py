@@ -150,6 +150,12 @@ def handle_text(event):
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply))
 
 
+from linebot.models import (
+    TextSendMessage, PostbackAction, QuickReplyButton, QuickReply, FlexSendMessage
+)
+
+temporary_selection = {}
+
 @handler.add(PostbackEvent)
 def handle_postback(event):
     user_id = event.source.user_id
@@ -159,18 +165,27 @@ def handle_postback(event):
         facility_id = data.replace("select_item_", "")
         temporary_selection[user_id] = facility_id
 
-        bubbles = []
-        for offset in range(3):  # 今月、翌月、翌々月
-            bubbles.append(create_flex_calendar(month_offset=offset))
-
-        msg = FlexSendMessage(
+        # Flex Messageを構築：今月〜翌々月
+        bubbles = [create_flex_calendar(offset) for offset in range(3)]
+        flex_msg = FlexSendMessage(
             alt_text="希望日を選んでください",
-            contents={
-                "type": "carousel",
-                "contents": bubbles
-            }
+            contents={"type": "carousel", "contents": bubbles}
         )
-        line_bot_api.reply_message(event.reply_token, msg)
+        line_bot_api.reply_message(event.reply_token, flex_msg)
+
+    elif data.startswith("select_date_"):
+        wish_date = data.replace("select_date_", "")
+        facility_id = temporary_selection.get(user_id)
+
+        if facility_id:
+            register_user_selection(user_id, facility_id, wish_date)
+            logger.info(f"希望登録 → user={user_id}, facility={facility_id}, date={wish_date}")
+            line_bot_api.reply_message(event.reply_token,
+                TextSendMessage(text=f"{wish_date} に希望を登録しました！"))
+        else:
+            logger.warning(f"希望登録失敗 → facility_id が未保持 (user={user_id})")
+            line_bot_api.reply_message(event.reply_token,
+                TextSendMessage(text="施設情報が見つかりませんでした。"))
 
 # Flex Message生成
 def show_selection_flex():
@@ -207,7 +222,6 @@ def create_flex_calendar(month_offset=0):
     month = target_month.month
     days = calendar.monthrange(year, month)[1]
 
-    # 日付ボタンを生成
     buttons = []
     for day in range(1, days + 1):
         date_obj = date(year, month, day)
@@ -224,7 +238,6 @@ def create_flex_calendar(month_offset=0):
         }
         buttons.append(button)
 
-    # Flex Messageを構築
     return {
         "type": "bubble",
         "body": {
@@ -233,10 +246,11 @@ def create_flex_calendar(month_offset=0):
             "spacing": "sm",
             "contents": [
                 {"type": "text", "text": f"{year}年{month}月 希望日一覧", "weight": "bold"},
-                {"type": "box", "layout": "vertical", "contents": buttons[:93]}  # 最大12件など制限対応
+                {"type": "box", "layout": "vertical", "contents": buttons[:93]}  # 制限に応じて調整
             ]
         }
     }
+
 
 
 def notify_user(user_id: str, message: str):
