@@ -53,6 +53,8 @@ def scrape_avl_from_calender(facility_id, facility_name): # avl=availabilityの�
         target_year = first_day.year
         target_month = first_day.month
 
+        logger.info(f"[{facility_name}] {target_year}年{target_month}月 スクレイピング開始")
+
         base_url = "https://linebottester.github.io/kenpo_test_site/test_calendar.html" # test用
         # base_url = "https://as.its-kenpo.or.jp/apply/empty_calendar" # 本番用
         # https://as.its-kenpo.or.jp/apply/calendar3 # こちらでは認証ページに遷移してしまう
