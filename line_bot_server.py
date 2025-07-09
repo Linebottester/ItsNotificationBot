@@ -163,7 +163,7 @@ def handle_postback(event):
                                                    data=f"select_date_{(today + timedelta(days=i)).isoformat()}"))
             for i in range(5)
         ]
-        msg = TextSendMessage(text="いつ希望しますか？", quick_reply=QuickReply(items=options))
+        msg = TextSendMessage(text="いつを希望しますか？", quick_reply=QuickReply(items=options))
         line_bot_api.reply_message(event.reply_token, msg)
 
     elif data.startswith("select_date_"):

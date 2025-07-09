@@ -142,8 +142,8 @@ def parse_and_save_avl(soup, facility_id, db_name="facility_data.db"):
                     logging.info(f"空きあり: {facility_id} {join_date} 状態: {status_text}")
                     count += 1
 
-                    for user_id in get_wished_user(facility_id):
-                        notify_user(user_id, f"{join_date} に {facility_id} の空きが出ました！")
+                    for user_id in get_wished_user(facility_id, join_date):
+                        notify_user(user_id, f"あなたの希望している施設の予約に空きが出ました！")
                         logging.info(f"通知 → user={user_id}, facility={facility_id}, date={join_date}")
                     
                     # line_utils.py（仮）に関数を配置して通知を送るようにする
@@ -267,13 +267,16 @@ def register_user_selection(user_id, facility_id, wish_date, db_name="facility_d
         logger.info("[DB接続終了]")
 
 # 施設の空きが検知されたら対象の施設のIDを受け取って希望者のIDを返す
-def get_wished_user(facility_id, db_name="facility_data.db"):
+def get_wished_user(facility_id, join_date, db_name="facility_data.db"):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base_dir, db_name)
 
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute("SELECT user_id FROM user_wishes WHERE facility_id = ?", (facility_id,))
+    cursor.execute(
+        "SELECT user_id FROM user_wishes WHERE facility_id = ? AND wish_date = ?",
+        (facility_id, join_date)
+    )
     results = [row[0] for row in cursor.fetchall()]
     conn.close()
     return results
