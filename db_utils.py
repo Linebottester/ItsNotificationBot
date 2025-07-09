@@ -1,6 +1,5 @@
 # db_utils.py
 
-from line_bot_server import notify_user
 from db_utils import get_wished_user
 from datetime import datetime
 import requests
@@ -91,6 +90,7 @@ def fetch_wished_facilities(db_name="facility_data.db"):
 
 # スクレイピングしたデータから施設の予約可否情報を抽出してfacility_availabilitiesテーブルに入れる
 def parse_and_save_avl(soup, facility_id, db_name="facility_data.db"):
+    from line_bot_server import notify_user
     base_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base_dir, db_name)
 
