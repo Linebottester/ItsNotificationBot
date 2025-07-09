@@ -60,7 +60,7 @@ def periodic_check():
         except Exception as e:
             print(f"定期処理エラー: {e}")
         # time.sleep(8 * 60 * 60)  # 8時間待つ
-        time.sleep(100)  # 60秒待つ（テスト用）
+        time.sleep(60)  # 60秒待つ（テスト用）
 
 
 # 共通エンドポイント：ヘルスチェック

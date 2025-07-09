@@ -50,6 +50,11 @@ def save_facilities(facilities, db_name="facility_data.db"):
 
 # スクレイピング時に、希望者のいる施設のみ限定するためにuser_wishesを参照する
 def fetch_wished_facilities(db_name="facility_data.db"):
+    import os
+    import sqlite3
+    import logging
+
+    logger = logging.getLogger(__name__)
     base_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base_dir, db_name)
 
@@ -58,34 +63,34 @@ def fetch_wished_facilities(db_name="facility_data.db"):
     cursor = conn.cursor()
 
     try:
-        #希望のある施設名user_wishesから取得する
-        cursor.execute("SELECT DISTINCT facility_id FROM user_wishes;")
-        wished_names = [row[0] for row in cursor.fetchall()]
+        # user_wishes にある希望施設の facility_id と user_id を facilities に JOIN
+        cursor.execute('''
+            SELECT uw.user_id, uw.facility_id, f.name AS facility_name, uw.wish_date
+            FROM user_wishes uw
+            JOIN facilities f ON uw.facility_id = f.id
+        ''')
 
-        if not wished_names:
+        rows = cursor.fetchall()
+        if not rows:
             logger.info("希望される施設がありません")
             return []
 
-        # SQL の IN 句を動的に生成
-        placeholders = ",".join("?" for _ in wished_names)
-        query = f'''
-            SELECT id, name FROM facilities
-            WHERE name IN ({placeholders})
-        '''
-
-        cursor.execute(query, wished_names)
-        matched_facilities = cursor.fetchall()
-        
-        return [{"id": row["id"], "facility_name": row["name"]} for row in matched_facilities]
+        return [
+            {
+                "user_id": row["user_id"],
+                "facility_id": row["facility_id"],
+                "facility_name": row["facility_name"],
+                "wish_date": row["wish_date"]  # ← このまま使うかは通知条件次第
+            }
+            for row in rows
+        ]
 
     except sqlite3.Error as e:
-        logger.error(f"DBエラー:{e}")
+        logger.error(f"DBエラー: {e}")
         return []
-    
+
     finally:
         conn.close()
-
-    return [row[0] for row in rows]
 
 # スクレイピングしたデータから施設の予約可否情報を抽出してfacility_availabilitiesテーブルに入れる
 def parse_and_save_avl(soup, facility_id, db_name="facility_data.db"):

@@ -30,8 +30,12 @@ def main():
     wished_facilities = fetch_wished_facilities()
 
     for wished_facility in wished_facilities:
-        #　施設を限定してスクレイピングをおこなう
-        scrape_avl_from_calender(facility_id=wished_facility["id"], facility_name=wished_facility["facility_name"])
+        scrape_avl_from_calender(
+            facility_id=wished_facility["facility_id"],
+            facility_name=wished_facility["facility_name"],  # 通知、ロガーなどに使うかも
+            user_id=wished_facility["user_id"],              
+            wish_date=wished_facility["wish_date"]           
+        )
 
 if __name__ == "__main__":
     main()
