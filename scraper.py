@@ -80,7 +80,6 @@ def scrape_avl_from_calender(facility_id, facility_name, user_id): # avl=availab
             soup = BeautifulSoup(response.content,"html.parser")
 
             # 抽出したsoupをdb_utils側の関数に渡して処理を投げる
-            # parse_and_save_avl(soup,facility_id)
             parse_and_notify_available_dates(soup, facility_id)
             
 

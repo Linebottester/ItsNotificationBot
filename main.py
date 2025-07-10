@@ -31,8 +31,7 @@ def main():
         scrape_avl_from_calender(
             facility_id=wished_facility["facility_id"],
             facility_name=wished_facility["facility_name"],  # 通知、ロガーなどに使うので引数として渡しておく
-            user_id=wished_facility["user_id"],              
-            wish_date=wished_facility["wish_date"]           
+            user_id=wished_facility["user_id"]        
         )
     # isfirst = 1 # 初回か否かの判定に用いる
 if __name__ == "__main__":
