@@ -87,7 +87,7 @@ def fetch_wished_facilities(db_name="facility_data.db"):
     finally:
         conn.close()
 
-# スクレイピングしたデータから施設の予約可否情報を抽出してfacility_availabilitiesテーブルに入れる
+# スクレイピングしたデータから施設の予約可否情報を抽出して通知する
 def parse_and_notify_available_dates(soup, facility_id):
     from line_bot_server import notify_user  # 循環Import対策
 
@@ -216,15 +216,15 @@ def register_user_selection(user_id, facility_id, db_name="facility_data.db"):
         logger.info("[DB接続終了]")
 
 # 施設の空きが検知されたら対象の施設のIDを受け取って希望者のIDを返す
-def get_wished_user(facility_id, join_date, db_name="facility_data.db"):
+def get_wished_user(facility_id, db_name="facility_data.db"):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base_dir, db_name)
 
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT user_id FROM user_wishes WHERE facility_id = ? AND wish_date = ?",
-        (facility_id, join_date)
+        "SELECT user_id FROM user_wishes WHERE facility_id = ?",
+        (facility_id)
     )
     results = [row[0] for row in cursor.fetchall()]
     conn.close()
