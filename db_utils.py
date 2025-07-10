@@ -99,7 +99,7 @@ def parse_and_notify_available_dates(soup, facility_id):
                 join_date = td["data-join-time"]
                 logging.info(f"空きあり: {facility_id} {join_date} 状態: {status_text}")
 
-                for user_id in get_wished_user(facility_id, join_date):  # 日付不要なら facility_id だけで抽出
+                for user_id in get_wished_user(facility_id):  # 日付不要なら facility_id だけで抽出
                     notify_user(user_id, f"{join_date} に {facility_id} の予約に空きが出ました！")
                     logging.info(f"通知 → user={user_id}, facility={facility_id}, date={join_date}")
             else:
