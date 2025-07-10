@@ -48,7 +48,6 @@ def save_facilities(facilities, db_name="facility_data.db"):
 
 # スクレイピング時に、希望者のいる施設のみ限定するためにuser_wishesを参照する
 def fetch_wished_facilities(db_name="facility_data.db"):
-    
     logger = logging.getLogger(__name__)
     base_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base_dir, db_name)
@@ -58,9 +57,9 @@ def fetch_wished_facilities(db_name="facility_data.db"):
     cursor = conn.cursor()
 
     try:
-        # user_wishes にある希望施設の facility_id と user_id を facilities に JOIN
+        # user_wishes にある希望施設情報を facilities に JOIN
         cursor.execute('''
-            SELECT uw.user_id, uw.facility_id, f.name AS facility_name, uw.wish_date
+            SELECT uw.user_id, uw.facility_id, f.name AS facility_name
             FROM user_wishes uw
             JOIN facilities f ON uw.facility_id = f.id
         ''')
@@ -76,8 +75,7 @@ def fetch_wished_facilities(db_name="facility_data.db"):
             {
                 "user_id": row["user_id"],
                 "facility_id": row["facility_id"],
-                "facility_name": row["facility_name"],
-                "wish_date": row["wish_date"]  
+                "facility_name": row["facility_name"]
             }
             for row in rows
         ]
