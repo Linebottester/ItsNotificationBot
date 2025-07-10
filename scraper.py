@@ -42,8 +42,8 @@ def scrape_facility_names_ids(url):
     logger.info(f'抽出完了: {len(facilities)} 件の施設を取得しました')
     return facilities
 
-def scrape_avl_from_calender(facility_id, facility_name, user_id, wish_date): # avl=availabilityの略　綴りミスが多いため
-    logger.info(f"[関数呼び出し] scrape_avl_from_calender → facility_id={facility_id}, name={facility_name}, user_id={user_id}, wish_date={wish_date}")
+def scrape_avl_from_calender(facility_id, facility_name, user_id): # avl=availabilityの略　綴りミスが多いため
+    logger.info(f"[関数呼び出し] scrape_avl_from_calender → facility_id={facility_id}, name={facility_name}, user_id={user_id}")
     
     # 今月、翌月、翌々月の３回転する
     today = datetime.now()

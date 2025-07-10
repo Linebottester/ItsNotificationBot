@@ -22,7 +22,7 @@ import time
 import os
 import logging
 import sqlite3
-import calendar
+
 
 # Flask アプリ作成
 app = Flask(__name__)
@@ -40,8 +40,6 @@ if not channel_access_token or not channel_secret:
 
 line_bot_api = LineBotApi(channel_access_token)
 handler = WebhookHandler(channel_secret)
-
-temporary_selection = {} #　希望入力時、一時的に記憶するための変数
 
 # SQLite DB 接続関数
 def get_db_connection(db_name="facility_data.db"):
@@ -176,6 +174,7 @@ def show_selection_flex():
         }
     )
 
+# 通知希望者に通知を送る
 def notify_user(user_id: str, message: str):
     line_bot_api = LineBotApi(os.getenv("LINE_CHANNEL_ACCESS_TOKEN"))
     line_bot_api.push_message(user_id, TextSendMessage(text=message))
