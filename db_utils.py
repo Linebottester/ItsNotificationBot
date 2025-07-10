@@ -89,7 +89,10 @@ def fetch_wished_facilities(db_name="facility_data.db"):
 
 # スクレイピングしたデータから施設の予約可否情報を抽出して通知する
 def parse_and_notify_available_dates(soup, facility_id):
-    from line_bot_server import notify_user  # 循環Import対策
+    from line_bot_server import notify_user
+    logger = logging.getLogger(__name__)
+
+    available_dates = []  # 空いている日を貯める
 
     for td in soup.find_all("td", attrs={"data-join-time": True, "data-night-count": "1"}):
         status_icon = td.find("span", class_="icon")
@@ -97,15 +100,25 @@ def parse_and_notify_available_dates(soup, facility_id):
             status_text = status_icon.get_text(strip=True)
             if status_text != "☓":
                 join_date = td["data-join-time"]
-                logging.info(f"空きあり: {facility_id} {join_date} 状態: {status_text}")
-
-                for user_id in get_wished_user(facility_id):  # 日付不要なら facility_id だけで抽出
-                    notify_user(user_id, f"{join_date} に {facility_id} の予約に空きが出ました！")
-                    logging.info(f"通知 → user={user_id}, facility={facility_id}, date={join_date}")
+                logger.info(f"空きあり: {facility_id} {join_date} 状態: {status_text}")
+                available_dates.append(join_date)
             else:
-                logging.debug(f"満室: {facility_id} {td['data-join-time']} 状態: {status_text}")
+                logger.debug(f"満室: {facility_id} {td['data-join-time']} 状態: {status_text}")
 
-    logger.info(f"{facility_id} の空き日程を通知しました。")
+    if not available_dates:
+        logger.info(f"{facility_id} に空き日程はありません")
+        return
+
+    # 希望者に対して一括通知
+    user_ids = get_wished_user(facility_id)
+    if not user_ids:
+        logger.info(f"{facility_id} に希望者はいません")
+        return
+
+    message_body = f"{facility_id} の予約に空きがあります！\n" + "\n".join(available_dates)
+    for user_id in user_ids:
+        notify_user(user_id, message_body)
+        logger.info(f"通知 → user={user_id}, facility={facility_id}, dates={available_dates}")
 
 # ユーザーがボットをフォローしたときそのIDをusersテーブルに保存
 def save_followed_userid(userid, db_name="facility_data.db"):
