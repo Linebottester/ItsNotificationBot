@@ -149,9 +149,6 @@ def handle_postback(event):
     if data.startswith("select_item_"):
         facility_id = data.replace("select_item_", "")
         register_user_selection(user_id, facility_id)
-        line_bot_api.reply_message(event.reply_token,
-        TextSendMessage(text=f"{facility_id} に希望を登録しました！"))
-
         logger.info(f"[希望登録完了] user={user_id}, facility={facility_id}")
         line_bot_api.reply_message(event.reply_token,
             TextSendMessage(text=f"{facility_id} に希望を登録しました！"))
