@@ -136,11 +136,6 @@ def handle_text(event):
     reply = "施設を選ぶには「希望」と入力してください。"
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply))
 
-
-from linebot.models import (
-    TextSendMessage, PostbackAction, QuickReplyButton, QuickReply, FlexSendMessage
-)
-
 @handler.add(PostbackEvent)
 def handle_postback(event):
     user_id = event.source.user_id
@@ -148,10 +143,11 @@ def handle_postback(event):
 
     if data.startswith("select_item_"):
         facility_id = data.replace("select_item_", "")
+        facility_name = next((item["name"] for item in get_items_from_db() if item["id"] == facility_id), None)
         register_user_selection(user_id, facility_id)
         logger.info(f"[希望登録完了] user={user_id}, facility={facility_id}")
         line_bot_api.reply_message(event.reply_token,
-            TextSendMessage(text=f"{facility_id} に希望を登録しました！"))
+            TextSendMessage(text=f"{facility_name} に希望を登録しました！"))
 
 # Flex Message生成
 def show_selection_flex():
