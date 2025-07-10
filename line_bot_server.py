@@ -132,21 +132,8 @@ def handle_text(event):
         line_bot_api.reply_message(event.reply_token, flex)
         return
 
-    try:
-        parsed_date = datetime.strptime(text, "%m月%d日").date().replace(year=date.today().year)
-        if parsed_date < date.today():
-            raise ValueError("過去の日付")
-
-        facility_id = temporary_selection.get(user_id)
-        if facility_id:
-            register_user_selection(user_id, facility_id, parsed_date.isoformat())
-            reply = f"{parsed_date.strftime('%-m月%-d日')} に希望を登録しました！"
-        else:
-            reply = "施設がまだ選択されていません。「希望」と入力して選んでください。"
-
-    except ValueError:
-        reply = "日付の形式が正しくありません。例：「8月5日」のように入力してください。"
-
+    # 案内メッセージを返信
+    reply = "施設を選ぶには「希望」と入力してください。"
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply))
 
 

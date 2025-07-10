@@ -249,7 +249,7 @@ def register_user_selection(user_id, facility_id, db_name="facility_data.db"):
         cursor.execute("""
             INSERT INTO user_wishes (user_id, facility_id)
             VALUES (?, ?)
-            ON CONFLICT(user_id, facility_id)
+            ON CONFLICT(user_id, facility_id) DO UPDATE SET created_at = CURRENT_TIMESTAMP;
         """, (user_id, facility_id))
         conn.commit()
 
