@@ -154,8 +154,6 @@ from linebot.models import (
     TextSendMessage, PostbackAction, QuickReplyButton, QuickReply, FlexSendMessage
 )
 
-temporary_selection = {}
-
 @handler.add(PostbackEvent)
 def handle_postback(event):
     user_id = event.source.user_id
@@ -163,29 +161,13 @@ def handle_postback(event):
 
     if data.startswith("select_item_"):
         facility_id = data.replace("select_item_", "")
-        temporary_selection[user_id] = facility_id
+        register_user_selection(user_id, facility_id)
+        line_bot_api.reply_message(event.reply_token,
+        TextSendMessage(text=f"{facility_id} に希望を登録しました！"))
 
-        # Flex Messageを構築：今月〜翌々月
-        bubbles = [create_flex_calendar(offset) for offset in range(3)]
-        flex_msg = FlexSendMessage(
-            alt_text="希望日を選んでください",
-            contents={"type": "carousel", "contents": bubbles}
-        )
-        line_bot_api.reply_message(event.reply_token, flex_msg)
-
-    elif data.startswith("select_date_"):
-        wish_date = data.replace("select_date_", "")
-        facility_id = temporary_selection.get(user_id)
-
-        if facility_id:
-            register_user_selection(user_id, facility_id, wish_date)
-            logger.info(f"希望登録 → user={user_id}, facility={facility_id}, date={wish_date}")
-            line_bot_api.reply_message(event.reply_token,
-                TextSendMessage(text=f"{wish_date} に希望を登録しました！"))
-        else:
-            logger.warning(f"希望登録失敗 → facility_id が未保持 (user={user_id})")
-            line_bot_api.reply_message(event.reply_token,
-                TextSendMessage(text="施設情報が見つかりませんでした。"))
+        logger.info(f"[希望登録完了] user={user_id}, facility={facility_id}")
+        line_bot_api.reply_message(event.reply_token,
+            TextSendMessage(text=f"{facility_id} に希望を登録しました！"))
 
 # Flex Message生成
 def show_selection_flex():
@@ -213,45 +195,6 @@ def show_selection_flex():
             }
         }
     )
-
-# 希望日程を入力させるFlexMessage
-def create_flex_calendar(month_offset=0):
-    today = date.today()
-    target_month = today + relativedelta(months=month_offset)
-    year = target_month.year
-    month = target_month.month
-    days = calendar.monthrange(year, month)[1]
-
-    buttons = []
-    for day in range(1, days + 1):
-        date_obj = date(year, month, day)
-        label = f"{month}月{day}日"
-        data = f"select_date_{date_obj.isoformat()}"
-        button = {
-            "type": "button",
-            "style": "primary",
-            "action": {
-                "type": "postback",
-                "label": label,
-                "data": data
-            }
-        }
-        buttons.append(button)
-
-    return {
-        "type": "bubble",
-        "body": {
-            "type": "box",
-            "layout": "vertical",
-            "spacing": "sm",
-            "contents": [
-                {"type": "text", "text": f"{year}年{month}月 希望日一覧", "weight": "bold"},
-                {"type": "box", "layout": "vertical", "contents": buttons[:93]}  # 制限に応じて調整
-            ]
-        }
-    }
-
-
 
 def notify_user(user_id: str, message: str):
     line_bot_api = LineBotApi(os.getenv("LINE_CHANNEL_ACCESS_TOKEN"))

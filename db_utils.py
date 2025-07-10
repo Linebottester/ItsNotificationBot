@@ -216,13 +216,13 @@ def get_items_from_db():
     return [{'id': item[0], 'name': item[1]} for item in items]
 
 # ユーザー希望する施設と日程を入力したときそれをuser_wishesにIDと紐づけて保存
-def register_user_selection(user_id, facility_id, wish_date, db_name="facility_data.db"):
+def register_user_selection(user_id, facility_id, db_name="facility_data.db"):
     logger.info(f"[絶対パス確認] {os.path.abspath(db_name)}")
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base_dir, db_name)
 
-    logger.info(f"[登録処理開始] user_id={user_id}, facility_id={facility_id}, wish_date={wish_date}")
+    logger.info(f"[登録処理開始] user_id={user_id}, facility_id={facility_id}")
     logger.info(f"[DB接続確認] facility_data.db 実パス: {db_path}")
 
     conn = sqlite3.connect(db_path)
@@ -237,7 +237,6 @@ def register_user_selection(user_id, facility_id, wish_date, db_name="facility_d
             CREATE TABLE IF NOT EXISTS user_wishes (
                 user_id TEXT NOT NULL,
                 facility_id TEXT NOT NULL,
-                wish_date DATE NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (user_id, facility_id),
                 FOREIGN KEY (user_id) REFERENCES users(user_id),
@@ -248,16 +247,16 @@ def register_user_selection(user_id, facility_id, wish_date, db_name="facility_d
 
         # 登録処理
         cursor.execute("""
-            INSERT INTO user_wishes (user_id, facility_id, wish_date)
-            VALUES (?, ?, ?)
+            INSERT INTO user_wishes (user_id, facility_id)
+            VALUES (?, ?)
             ON CONFLICT(user_id, facility_id) DO UPDATE SET wish_date = excluded.wish_date
-        """, (user_id, facility_id, wish_date))
+        """, (user_id, facility_id))
         conn.commit()
 
-        logger.info(f"[登録成功] {user_id=} に {facility_id=} を {wish_date=} で登録")
+        logger.info(f"[登録成功] {user_id=} に {facility_id=} を登録")
 
     except sqlite3.Error as e:
-        logger.error(f"[登録失敗] {user_id=}, {facility_id=}, {wish_date=} - エラー内容: {e}")
+        logger.error(f"[登録失敗] {user_id=}, {facility_id=} - エラー内容: {e}")
 
     finally:
         conn.close()
