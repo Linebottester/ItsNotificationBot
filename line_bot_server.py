@@ -145,7 +145,7 @@ def handle_postback(event):
         register_user_selection(user_id, facility_id)
         logger.info(f"[希望登録完了] user={user_id}, facility={facility_id}")
         line_bot_api.reply_message(event.reply_token,
-            TextSendMessage(text=f"{facility_name} に希望を登録しました！"))
+            TextSendMessage(text=f"{facility_name} を予約希望施設として登録しました！"))
 
 # Flex Message生成
 def show_selection_flex():

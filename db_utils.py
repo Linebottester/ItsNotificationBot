@@ -90,69 +90,24 @@ def fetch_wished_facilities(db_name="facility_data.db"):
         conn.close()
 
 # スクレイピングしたデータから施設の予約可否情報を抽出してfacility_availabilitiesテーブルに入れる
-def parse_and_save_avl(soup, facility_id, db_name="facility_data.db"):
-    from line_bot_server import notify_user # 循環Import対策
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    db_path = os.path.join(base_dir, db_name)
+def parse_and_notify_available_dates(soup, facility_id):
+    from line_bot_server import notify_user  # 循環Import対策
 
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    
-    count = 0
-    # 一泊分かつ予約可能状況がXでないもののみに絞る　
     for td in soup.find_all("td", attrs={"data-join-time": True, "data-night-count": "1"}):
         status_icon = td.find("span", class_="icon")
         if status_icon:
             status_text = status_icon.get_text(strip=True)
-            if status_text != "☓":  # ☓は除外する（満室）
+            if status_text != "☓":
                 join_date = td["data-join-time"]
+                logging.info(f"空きあり: {facility_id} {join_date} 状態: {status_text}")
 
-                # データ検知時、テーブルがなかったら作成する
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS facility_availabilities (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        facility_id TEXT NOT NULL,
-                        date TEXT NOT NULL,
-                        status TEXT,
-                        UNIQUE(facility_id, date)
-                    )
-                ''')
-                
-                # 挿入前にレコード数を確認（重複チェック用）
-                cursor.execute('''
-                    SELECT COUNT(*) FROM facility_availabilities WHERE facility_id = ? AND date = ?
-                ''', (facility_id, join_date))
-                before_count = cursor.fetchone()[0]
+                for user_id in get_wished_user(facility_id, join_date):  # 日付不要なら facility_id だけで抽出
+                    notify_user(user_id, f"{join_date} に {facility_id} の予約に空きが出ました！")
+                    logging.info(f"通知 → user={user_id}, facility={facility_id}, date={join_date}")
+            else:
+                logging.debug(f"満室: {facility_id} {td['data-join-time']} 状態: {status_text}")
 
-                # INSERT OR IGNORE による挿入
-                cursor.execute('''
-                    INSERT OR IGNORE INTO facility_availabilities (facility_id, date, status)
-                    VALUES (?, ?, ?)
-                ''', (facility_id, join_date, status_text))
-
-                # 挿入後にレコード数を再確認
-                cursor.execute('''
-                    SELECT COUNT(*) FROM facility_availabilities WHERE facility_id = ? AND date = ?
-                ''', (facility_id, join_date))
-                after_count = cursor.fetchone()[0]
-
-                # 新規データが挿入された=空き状況が発生したものとする
-                if after_count > before_count:
-                    logging.info(f"空きあり: {facility_id} {join_date} 状態: {status_text}")
-                    count += 1
-
-                    for user_id in get_wished_user(facility_id, join_date):
-                        notify_user(user_id, f"あなたの希望している施設の予約に空きが出ました！")
-                        logging.info(f"通知 → user={user_id}, facility={facility_id}, date={join_date}")
-
-                else:
-                    logging.info(f"既に登録済み: {facility_id} {join_date} ")
-
-                # !!!!通知したfacility_availabilitiesデータは元テーブルから消すべき（？）!!!!!
-
-    conn.commit()
-    conn.close()
-    logger.info(f"{facility_id} の空きデータ {count} 件を保存しました。")
+    logger.info(f"{facility_id} の空き日程を通知しました。")
 
 # ユーザーがボットをフォローしたときそのIDをusersテーブルに保存
 def save_followed_userid(userid, db_name="facility_data.db"):
