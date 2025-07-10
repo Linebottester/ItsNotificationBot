@@ -176,8 +176,20 @@ def show_selection_flex():
 
 # 通知希望者に通知を送る
 def notify_user(user_id: str, message: str):
-    line_bot_api = LineBotApi(os.getenv("LINE_CHANNEL_ACCESS_TOKEN"))
-    line_bot_api.push_message(user_id, TextSendMessage(text=message))
+    logger = logging.getLogger(__name__)
+    logger.info(f"notify_user() 呼び出し: user_id={user_id}, message={message}")
+
+    access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
+    if not access_token:
+        logger.error("LINE_CHANNEL_ACCESS_TOKEN が未設定または空です")
+        return
+
+    try:
+        line_bot_api = LineBotApi(access_token)
+        line_bot_api.push_message(user_id, TextSendMessage(text=message))
+        logger.info(f"通知送信完了: user_id={user_id}")
+    except Exception as e:
+        logger.error(f"LINE通知送信エラー: {e}")
 
 # 定期実行スレッドの起動
 threading.Thread(target=periodic_check, daemon=True).start()

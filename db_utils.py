@@ -217,15 +217,26 @@ def register_user_selection(user_id, facility_id, db_name="facility_data.db"):
 
 # 施設の空きが検知されたら対象の施設のIDを受け取って希望者のIDを返す
 def get_wished_user(facility_id, db_name="facility_data.db"):
+    logger = logging.getLogger(__name__)
+    logger.info(f"get_wished_user() 呼び出し: facility_id={facility_id}")
+
     base_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base_dir, db_name)
 
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT user_id FROM user_wishes WHERE facility_id = ?",
-        (facility_id)
-    )
-    results = [row[0] for row in cursor.fetchall()]
-    conn.close()
-    return results
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT user_id FROM user_wishes WHERE facility_id = ?",
+            (facility_id,)  # ,をつける書き方をタプルといい、これがないとstr扱いになるらしい
+        )
+        results = [row[0] for row in cursor.fetchall()]
+        logger.info(f"対象ユーザー数: {len(results)} 件")
+        return results
+
+    except sqlite3.Error as e:
+        logger.error(f"get_wished_user() DBエラー: {e}")
+        return []
+
+    finally:
+        conn.close()
