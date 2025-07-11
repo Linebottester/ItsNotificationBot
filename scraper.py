@@ -82,10 +82,7 @@ def scrape_avl_from_calender(facility_id, facility_name, user_id):
             logger.error(f"{target_year}年{target_month}月の施設名:{facility_name}, 施設ID:{facility_id} の取得に失敗: {e}")
 
     # 全体の空き日をまとめて通知
-    if all_available_dates:
-        notify_user_about_dates(sorted(all_available_dates), facility_name, facility_id, user_id)
-    else:
-        logger.info(f"{facility_id} に空き日程はありません")
+    notify_user_about_dates(sorted(all_available_dates), facility_name, facility_id, user_id)
 
 def extract_available_dates(soup, facility_id):
     logger = logging.getLogger(__name__)
