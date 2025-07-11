@@ -252,6 +252,7 @@ def get_wished_user(facility_id, db_name="facility_data.db"):
 
     finally:
         conn.close()
+
 # userのデータをusers、user_wishesから消す
 def remove_user_from_db(user_id, db_name="facility_data.db"):
 
@@ -260,6 +261,9 @@ def remove_user_from_db(user_id, db_name="facility_data.db"):
     logger.info(f"対象のユーザーID:{user_id}をテーブルから削除します")
 
     try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
         cursor.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
         cursor.execute("DELETE FROM user_wishes WHERE user_id = ?", (user_id,))
         conn.commit()
