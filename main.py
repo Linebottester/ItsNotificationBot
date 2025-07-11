@@ -13,12 +13,12 @@ logger = logging.getLogger(__name__)
 def main():
     
     # 施設の名前とURL一覧を取得
-    facility_url = "https://linebottester.github.io/kenpo_test_site/test_calendar.html" # テスト用
-    # facility_url = "https://as.its-kenpo.or.jp/apply/empty_calendar?s=PT13TjJjVFBrbG1KbFZuYzAxVFp5Vkhkd0YyWWZWR2JuOTJiblpTWjFKSGQ5a0hkdzFXWg%3D%3D&join_date=&night_count=1"
-    
+    facility_url = "https://as.its-kenpo.or.jp/apply/empty_calendar?s=PT13TjJjVFBrbG1KbFZuYzAxVFp5Vkhkd0YyWWZWR2JuOTJiblpTWjFKSGQ5a0hkdzFXWg%3D%3D&join_date=&night_count=1"
+    # "https://linebottester.github.io/kenpo_test_site/test_calendar.html" # テスト用
 
     # 施設名と施設IDを取得する　毎回見に行くのはナンセンスな気がする　月初めのみに限定すべきか
-    #　if isfirst == 0 or datetime.today().day == 1:　#　例えばこんな感じとか
+    #　if isfirst == 1 or datetime.today().day == 1:　#　例えばこんな感じとか
+    # isfirst = 0 # 実行後0にする
 
     facilities = scrape_facility_names_ids(facility_url)
     save_facilities(facilities) #取得してきた施設と施設IDをDBへ保存
@@ -33,6 +33,6 @@ def main():
             facility_name=wished_facility["facility_name"],  # 通知、ロガーなどに使うので引数として渡しておく
             user_id=wished_facility["user_id"]        
         )
-    # isfirst = 1 # 初回か否かの判定に用いる
+    
 if __name__ == "__main__":
     main()

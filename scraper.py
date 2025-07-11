@@ -56,8 +56,8 @@ def scrape_avl_from_calender(facility_id, facility_name, user_id):
 
         logger.info(f"[{facility_name}] {target_year}年{target_month}月 スクレイピング開始")
         
-        base_url = "https://linebottester.github.io/kenpo_test_site/test_calendar.html" # !!!!!test用!!!!!
-                # base_url = "https://as.its-kenpo.or.jp/apply/empty_calendar" # 本番用
+        base_url = base_url = "https://as.its-kenpo.or.jp/apply/empty_calendar" # 本番用
+                # "https://linebottester.github.io/kenpo_test_site/test_calendar.html" # !!!!!test用!!!!!
                 # https://as.its-kenpo.or.jp/apply/calendar3 # こちらでは認証ページに遷移してしまう
 
                 # Urlの変数部分を定義する　パラメータがすべて空だと保養施設の案内ページに行く
