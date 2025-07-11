@@ -107,6 +107,12 @@ def notify_user_about_dates(date_list, facility_name, facility_id, user_id):
     from line_bot_server import notify_user
     logger = logging.getLogger(__name__)
 
+    if not date_list:
+        notify_text = f"{facility_name}には現在予約可能な日程がありません。"
+        notify_user(user_id, notify_text)
+        logger.info(f"{facility_id} に空きなし通知を送信 → {notify_text}")
+        return
+
     formatted_dates = []
     for date_str in date_list:
         dt = datetime.strptime(date_str, "%Y-%m-%d")
