@@ -63,8 +63,8 @@ def scrape_avl_from_calender(facility_id, facility_name, user_id): # avl=availab
         # Urlの変数部分を定義する　パラメータがすべて空だと保養施設の案内ページに行く # テスト時はずす
         params = {
             's': facility_id, #　各施設のID（と思しき変数）# テスト時はずす
-            'join_date': first_day.strftime("%Y-%m-%d"), 
-            #'join_date': first_day,#'2025-07-01', # スクレイピングを行う月を指定する,空の時は今月を見に行くようだ
+            # 'join_date': first_day.strftime("%Y-%m-%d"), 
+            'join_date': first_day,#'2025-07-01', # スクレイピングを行う月を指定する,空の時は今月を見に行くようだ
             'night_count':'' # 泊数をしているようだが効いていないように見える
         }
 
@@ -74,8 +74,7 @@ def scrape_avl_from_calender(facility_id, facility_name, user_id): # avl=availab
         # s=PUF6TjMwRFpwWlNaMUpIZDlrSGR3MVda ホテルハーヴェスト南紀田辺
 
         try:
-            response = requests.get(base_url, params=params) #!!!!! test用 !!!!!
-            #response = requests.get(base_url, params=params) #本番用
+            response = requests.get(base_url, params=params) #本番用
             response.raise_for_status()
             logger.info(f"{target_year}年{target_month}月の施設名:{facility_name}, 施設ID:{facility_id}に対するページ取得成功")
             soup = BeautifulSoup(response.content,"html.parser")
