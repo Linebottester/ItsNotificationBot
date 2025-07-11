@@ -14,7 +14,8 @@ from linebot.exceptions import InvalidSignatureError
 from scraper import scrape_avl_from_calender
 from db_utils import (
     get_items_from_db, save_followed_userid,
-    register_user_selection,fetch_wished_facilities
+    register_user_selection,fetch_wished_facilities,
+    remove_user_from_db
 )
 
 import threading
