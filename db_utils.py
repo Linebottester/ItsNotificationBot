@@ -89,7 +89,7 @@ def fetch_wished_facilities(db_name="facility_data.db"):
 
 # スクレイピングしたデータから施設の予約可否情報を抽出して通知する
 def parse_and_notify_available_dates(soup, facility_id, facility_name, user_id):
-    from line_bot_server import notify_user
+    from line_bot_server import notify_user # 循環インポート対策
     logger = logging.getLogger(__name__)
     available_dates = []
 
@@ -182,7 +182,6 @@ def get_items_from_db():
 
 # ユーザー希望する施設と日程を入力したときそれをuser_wishesにIDと紐づけて保存
 def register_user_selection(user_id, facility_id, db_name="facility_data.db"):
-    logger.info(f"[絶対パス確認] {os.path.abspath(db_name)}")
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base_dir, db_name)
@@ -229,11 +228,12 @@ def register_user_selection(user_id, facility_id, db_name="facility_data.db"):
 
 # 施設の空きが検知されたら対象の施設のIDを受け取って希望者のIDを返す
 def get_wished_user(facility_id, db_name="facility_data.db"):
-    logger = logging.getLogger(__name__)
-    logger.info(f"get_wished_user() 呼び出し: facility_id={facility_id}")
-
+    
     base_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(base_dir, db_name)
+
+    logger = logging.getLogger(__name__)
+    logger.info(f"get_wished_user() 呼び出し: facility_id={facility_id}")
 
     try:
         conn = sqlite3.connect(db_path)
@@ -253,10 +253,10 @@ def get_wished_user(facility_id, db_name="facility_data.db"):
     finally:
         conn.close()
 # userのデータをusers、user_wishesから消す
-def remove_user_from_db(user_id):
-    db_path = "facility_data.db"
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
+def remove_user_from_db(user_id, db_name="facility_data.db"):
+
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(base_dir, db_name)
     logger.info(f"対象のユーザーID:{user_id}をテーブルから削除します")
 
     try:
