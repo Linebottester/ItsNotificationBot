@@ -134,35 +134,24 @@ def handle_text(event):
         line_bot_api.reply_message(event.reply_token, flex)
         return
 
-    # 案内メッセージを返信
-    reply = "施設を選ぶには「希望」と入力してください。"
-    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply))
-
-@handler.add(MessageEvent, message=TextMessage)
-def handle_text(event):
-    user_id = event.source.user_id
-    text = event.message.text.strip()
-
     if text == "確認":
         try:
-            # 希望されている施設IDと名前をDBから取得してきて
             wished_facilities = fetch_wished_facilities()
-
-            # 希望のある施設のみをスクレイピングする
             for wished_facility in wished_facilities:
                 scrape_avl_from_calender(
                     facility_id=wished_facility["facility_id"],
-                    facility_name=wished_facility["facility_name"],  # 通知、ロガーなどに使うので引数として渡しておく
-                    user_id=wished_facility["user_id"]        
+                    facility_name=wished_facility["facility_name"],
+                    user_id=wished_facility["user_id"]
                 )
             logger.info("手動スクレイピングが実行されました")
         except Exception as e:
             logger.error(f"手動処理エラー: {e}")
         return
 
-    # 案内メッセージを返信
-    reply = "予約情状況を確認するときは「確認」と入力してください。"
+    # どちらにも当てはまらない場合
+    reply = "施設を選ぶには「希望」、予約状況を確認するには「確認」と入力してください。"
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply))
+
 
 @handler.add(PostbackEvent)
 def handle_postback(event):
