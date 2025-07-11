@@ -1,7 +1,6 @@
 # db_utils.py
 
 from datetime import datetime
-from line_bot_server import notify_user
 import sqlite3
 import os 
 import logging
@@ -90,6 +89,7 @@ def fetch_wished_facilities(db_name="facility_data.db"):
 
 # スクレイピングしたデータから施設の予約可否情報を抽出して通知する
 def parse_and_notify_available_dates(soup, facility_id, facility_name, user_id):
+    from line_bot_server import notify_user
     logger = logging.getLogger(__name__)
     available_dates = []
 
