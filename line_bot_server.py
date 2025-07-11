@@ -8,7 +8,7 @@ from main import main
 from linebot import LineBotApi, WebhookHandler
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
-    FlexSendMessage, PostbackEvent, FollowEvent
+    FlexSendMessage, PostbackEvent, FollowEvent, UnfollowEvent
 )
 from linebot.exceptions import InvalidSignatureError
 from scraper import scrape_avl_from_calender
@@ -209,6 +209,16 @@ def notify_user(user_id: str, message: str):
         logger.info(f"通知送信完了: user_id={user_id}")
     except Exception as e:
         logger.error(f"LINE通知送信エラー: {e}")
+
+# フォローを外した（ブロック）ユーザのデータを消す
+@handler.add(UnfollowEvent)
+def handle_unfollow(event):
+    user_id = event.source.user_id
+    logger.info(f"UnfollowEvent 受信: user_id={user_id}")
+
+    # DBからユーザー情報を削除する処理をここに書く
+    remove_user_from_db(user_id)
+
 
 # Flask起動
 if __name__ == "__main__":
