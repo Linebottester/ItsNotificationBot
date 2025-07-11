@@ -1,6 +1,7 @@
 # db_utils.py
 
 from datetime import datetime
+from line_bot_server import notify_user
 import sqlite3
 import os 
 import logging
@@ -88,37 +89,35 @@ def fetch_wished_facilities(db_name="facility_data.db"):
         conn.close()
 
 # スクレイピングしたデータから施設の予約可否情報を抽出して通知する
-def parse_and_notify_available_dates(soup, facility_id):
-    from line_bot_server import notify_user
+def parse_and_notify_available_dates(soup, facility_id, facility_name, user_id):
     logger = logging.getLogger(__name__)
-
-    available_dates = []  # 空いている日を貯める
+    available_dates = []
 
     for td in soup.find_all("td", attrs={"data-join-time": True, "data-night-count": "1"}):
         status_icon = td.find("span", class_="icon")
         if status_icon:
             status_text = status_icon.get_text(strip=True)
+            join_date = td["data-join-time"]
             if status_text != "☓":
-                join_date = td["data-join-time"]
                 logger.info(f"空きあり: {facility_id} {join_date} 状態: {status_text}")
                 available_dates.append(join_date)
             else:
-                logger.debug(f"満室: {facility_id} {td['data-join-time']} 状態: {status_text}")
+                logger.debug(f"満室: {facility_id} {join_date} 状態: {status_text}")
 
     if not available_dates:
         logger.info(f"{facility_id} に空き日程はありません")
         return
 
-    # 希望者に対して一括通知
-    user_ids = get_wished_user(facility_id)
-    if not user_ids:
-        logger.info(f"{facility_id} に希望者はいません")
-        return
+    # 空き日を整形してまとめて通知
+    formatted_dates = []
+    for date_str in available_dates:
+        dt = datetime.strptime(date_str, "%Y-%m-%d")
+        weekday = "月火水木金土日"[dt.weekday()]
+        formatted_dates.append(f"{dt.month}月{dt.day}日（{weekday}）")
 
-    message_body = f"{facility_id} の予約に空きがあります！\n" + "\n".join(available_dates)
-    for user_id in user_ids:
-        notify_user(user_id, message_body)
-        logger.info(f"通知 → user={user_id}, facility={facility_id}, dates={available_dates}")
+    notify_text = f"{facility_name}の次の日程に空きがあります。\n" + "、".join(formatted_dates)
+    notify_user(user_id, notify_text)
+    logger.info(f"{facility_id} に空き通知を送信 → {notify_text}")
 
 # ユーザーがボットをフォローしたときそのIDをusersテーブルに保存
 def save_followed_userid(userid, db_name="facility_data.db"):

@@ -80,9 +80,11 @@ def scrape_avl_from_calender(facility_id, facility_name, user_id): # avl=availab
             soup = BeautifulSoup(response.content,"html.parser")
 
             # 抽出したsoupをdb_utils側の関数に渡して処理を投げる
-            parse_and_notify_available_dates(soup, facility_id)
+            parse_and_notify_available_dates(soup, facility_id, facility_name)
             
         except requests.RequestException as e:
             logging.error(f"{target_year}年{target_month}月の施設名:{facility_name}, 施設ID: {facility_id} の取得に失敗: {e}")
+
+
 
         
