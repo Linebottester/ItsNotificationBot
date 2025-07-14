@@ -1,9 +1,8 @@
 # scraper.py
 
 from bs4 import BeautifulSoup
-from db_utils import parse_and_notify_available_dates
 from urllib.parse import quote
-from datetime import datetime, timedelta
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import re
 import logging
