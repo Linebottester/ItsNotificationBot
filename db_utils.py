@@ -64,26 +64,35 @@ def save_facilities(facilities):
     try:
         with psycopg2.connect(database_url) as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                new_count = 0
+                skip_count = 0
+                
                 for facility in facilities:
                     try:
                         cursor.execute('''
                             INSERT INTO facilities (id, name)
                             VALUES (%s, %s)
-                            ON CONFLICT(id) DO UPDATE SET name=excluded.name
+                            ON CONFLICT(id) DO NOTHING
                         ''', (facility['id'], facility['name']))
-                        logger.info(f"保存完了: {facility['name']} (ID={facility['id']})")
+                        
+                        # 実際に挿入された行数を確認
+                        if cursor.rowcount > 0:
+                            new_count += 1
+                            logger.info(f"新規保存: {facility['name']} (ID={facility['id']})")
+                        else:
+                            skip_count += 1
+                            logger.info(f"既存のためスキップ: {facility['name']} (ID={facility['id']})")
+                            
                     except psycopg2.Error as e:
                         logger.error(f"保存失敗: {facility['id']} - {e}")
-                        # 個別のエラーは続行（他の施設の保存は継続）
                         continue
 
-                logger.info('すべての施設情報を保存しました')
+                logger.info(f'施設情報保存完了 - 新規: {new_count}件, スキップ: {skip_count}件')
     
     except psycopg2.Error as e:
         logger.error(f'DB接続エラー: {e}')
     except Exception as e:
         logger.error(f'予期しないエラー: {e}')
-        conn.close()
 
 # スクレイピング時に、希望者のいる施設のみ限定するためにuser_wishesを参照する
 def fetch_wished_facilities():
