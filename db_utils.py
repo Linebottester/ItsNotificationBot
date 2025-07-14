@@ -137,21 +137,15 @@ def save_followed_userid(userid):
         with psycopg2.connect(database_url) as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cursor:
                 cursor.execute('''
-                INSERT INTO users (user_id)
-                VALUES (%s)
-                ON CONFLICT(user_id) DO NOTHING
-            ''', (userid))
-            
-            affected_rows = cursor.rowcount
-            logger.info(f"挿入された行数: {affected_rows}")
-
-            conn.commit()
-            logger.info(f"ユーザーID:{userid} を保存しました")
-
-            # 確認クエリ
-            cursor.execute("SELECT COUNT(*) FROM users WHERE user_id = %s", (userid,))
-            count = cursor.fetchone()['count']
-            logger.info(f"DBに保存されている件数: {count}")
+                    INSERT INTO users (user_id)
+                    VALUES (%s)
+                    ON CONFLICT(user_id) DO NOTHING
+                ''', (userid,))
+                
+                affected_rows = cursor.rowcount
+                logger.info(f"挿入された行数: {affected_rows}")
+                
+        logger.info(f"ユーザーID:{userid} を保存しました")
 
     except psycopg2.Error as e:
         logger.error(f"DBエラー: {e}")
