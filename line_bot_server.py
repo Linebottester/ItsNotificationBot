@@ -1,8 +1,6 @@
 #line_bot_server.py
 
 from flask import Flask, request, jsonify
-from datetime import datetime, date
-from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
 from main import main
 from linebot import LineBotApi, WebhookHandler
@@ -18,8 +16,6 @@ from db_utils import (
     remove_user_from_db
 )
 
-import threading
-import time
 import os
 import logging
 import sqlite3
