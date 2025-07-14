@@ -1,14 +1,19 @@
 # main.py
 
-from scraper import scrape_facility_names_ids
-from scraper import scrape_avl_from_calender
+from db_utils import create_tables
 from db_utils import save_facilities
 from db_utils import fetch_wished_facilities
+from scraper import scrape_facility_names_ids
+from scraper import scrape_avl_from_calender
+
 import logging
 
 # ロガー設定
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
+
+# サービス起動時に1回だけ実行　各テーブルを作成
+create_tables()
 
 def main():
     
