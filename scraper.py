@@ -55,7 +55,7 @@ def scrape_avl_from_calender(facility_id, facility_name, user_id):
 
         logger.info(f"[{facility_name}] {target_year}年{target_month}月 スクレイピング開始")
         
-        base_url = base_url = "https://as.its-kenpo.or.jp/apply/empty_calendar" # 本番用
+        base_url = "https://as.its-kenpo.or.jp/apply/empty_calendar" # 本番用
                 # "https://linebottester.github.io/kenpo_test_site/test_calendar.html" # !!!!!test用!!!!!
                 # https://as.its-kenpo.or.jp/apply/calendar3 # こちらでは認証ページに遷移してしまう
 
@@ -81,7 +81,8 @@ def scrape_avl_from_calender(facility_id, facility_name, user_id):
             logger.error(f"{target_year}年{target_month}月の施設名:{facility_name}, 施設ID:{facility_id} の取得に失敗: {e}")
 
     # 全体の空き日をまとめて通知
-    notify_user_about_dates(sorted(all_available_dates), facility_name, facility_id, user_id)
+    calendar_url = f"https://as.its-kenpo.or.jp/apply/empty_calendar?s={facility_id}"
+    notify_user_about_dates(sorted(all_available_dates), facility_name, facility_id, user_id, calendar_url)
 
 def extract_available_dates(soup, facility_id):
     logger = logging.getLogger(__name__)
@@ -99,7 +100,7 @@ def extract_available_dates(soup, facility_id):
                 logger.debug(f"満室: {facility_id} {join_date} 状態: {status_text}")
     return available_dates
 
-def notify_user_about_dates(date_list, facility_name, facility_id, user_id):
+def notify_user_about_dates(date_list, facility_name, facility_id, user_id, calendar_url):
     from line_bot_server import notify_user
     logger = logging.getLogger(__name__)
 
@@ -115,7 +116,11 @@ def notify_user_about_dates(date_list, facility_name, facility_id, user_id):
         weekday = "月火水木金土日"[dt.weekday()]
         formatted_dates.append(f"{dt.month}月{dt.day}日（{weekday}）")
 
-    notify_text = f"{facility_name}の次の日程に空きがあります。\n" + "、".join(formatted_dates)
+    notify_text = (
+        f"{facility_name}の次の日程に空きがあります。\n"
+        + "、".join(formatted_dates)
+        + f"\n\n予約ページはこちら：{calendar_url}"
+    )
     notify_user(user_id, notify_text)
     logger.info(f"{facility_id} に空き通知を送信 → {notify_text}")
 
