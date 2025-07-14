@@ -114,12 +114,28 @@ def webhook():
 # LINE Botイベントハンドラ
 @handler.add(FollowEvent)
 def handle_follow(event):
-    user_id = event.source.user_id
-    save_followed_userid(user_id)
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text="フォローありがとうございます！希望施設を登録したいときは「希望」、\n予約状況を確認したいときは「確認」と送ってください😊")
-    )
+    try:
+        user_id = event.source.user_id
+        save_followed_userid(user_id)
+        
+        welcome_message = (
+            "フォローありがとうございます！\n"
+            "希望施設を登録したいときは「希望」、\n"
+            "予約状況を確認したいときは「確認」と送ってください😊"
+        )
+        
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=welcome_message)
+        )
+        
+    except Exception as e:
+        logger.error(f"フォローイベント処理エラー: {e}")
+        # エラー時の応答
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text="申し訳ございません。エラーが発生しました。")
+        )
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_text(event):
