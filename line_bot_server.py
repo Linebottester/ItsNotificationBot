@@ -18,7 +18,8 @@ from db_utils import (
 
 import os
 import logging
-import sqlite3
+import threading
+import time
 
 
 # Flask アプリ作成
@@ -38,62 +39,26 @@ if not channel_access_token or not channel_secret:
 line_bot_api = LineBotApi(channel_access_token)
 handler = WebhookHandler(channel_secret)
 
-# SQLite DB 接続関数
-def get_db_connection(db_name="facility_data.db"):
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    db_path = os.path.join(base_dir, db_name)
-    logger.info(f"[DB接続] パス: {db_path}")
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
-    return conn
-
 # main.py定期実行用関数 開発中につき停止
-"""
+
 def periodic_check():
     while True:
         try:
             main() 
-            Logger.info("定期スクレイピングが実行されました")
+            logger.info("定期スクレイピングが実行されました")
         except Exception as e:
-            Logger.error(f"定期処理エラー: {e}")
+            logger.error(f"定期処理エラー: {e}")
         time.sleep(8 * 60 * 60)  # 8時間待つ
         # time.sleep(60)  # 60秒待つ（テスト用）
 
 # 定期実行スレッドの起動
 threading.Thread(target=periodic_check, daemon=True).start()
-"""
+
 
 # 共通エンドポイント：ヘルスチェック
 @app.route("/", methods=["GET"])
 def index():
     return jsonify({"message": "LINE Bot & DB API が稼働中です！"})
-
-# DB管理エンドポイント群
-@app.route("/tables")
-def list_tables():
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';")
-        tables = [row["name"] for row in cursor.fetchall()]
-        return jsonify({"tables": tables})
-    except sqlite3.Error as e:
-        return jsonify({"error": str(e)})
-    finally:
-        conn.close()
-
-@app.route("/table/<table_name>")
-def show_table_contents(table_name):
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute(f"SELECT * FROM {table_name}")
-        rows = cursor.fetchall()
-        return jsonify({"data": [dict(row) for row in rows]})
-    except sqlite3.Error as e:
-        return jsonify({"error": str(e)})
-    finally:
-        conn.close()
 
 # LINE Webhook 受信
 @app.route("/webhook", methods=["POST"])
@@ -150,6 +115,11 @@ def handle_text(event):
     if text == "確認":
         try:
             wished_facilities = fetch_wished_facilities()
+            if not wished_facilities:
+                reply = "希望施設が登録されていません。先に「希望」と入力して登録をしてください。"
+                line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply))
+                return
+
             for wished_facility in wished_facilities:
                 scrape_avl_from_calender(
                     facility_id=wished_facility["facility_id"],
