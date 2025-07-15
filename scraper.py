@@ -86,6 +86,11 @@ def scrape_avl_from_calender(facility_id, facility_name, user_id, is_manual):
     if not all_available_dates:
         if is_manual:
             return f"{facility_name}には現在予約可能な日程がありません。"
+        else:
+            logger.info(f" 定期実行：空きなし → facility_name={facility_name}, user_id={user_id}")
+            return ""
+
+
         return "" #　定期処理
     
     formatted_dates = [
