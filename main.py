@@ -1,55 +1,43 @@
 # main.py
 
-import os
-import time
+from db_utils import create_tables
+from db_utils import save_facilities
+from db_utils import fetch_wished_facilities
+from scraper import scrape_facility_names_ids
+from scraper import scrape_avl_from_calender
+
 import logging
-import threading
-from datetime import datetime, timedelta
-from db_utils import save_facilities, fetch_wished_facilities
-from scraper import scrape_facility_names_ids, scrape_avl_from_calender
-from linebot import LineBotApi
-from linebot.models import TextSendMessage
 
 # ロガー設定
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
-# LINE Bot API 初期化
-LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
-line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
+# サービス起動時に1回だけ実行　各テーブルを作成
+create_tables()
 
 def main():
-    facility_url = "https://as.its-kenpo.or.jp/apply/empty_calendar?s=PT13T..."  # ←フルURLをここに貼ってください
+    
+    # 施設の名前とURL一覧を取得
+    facility_url = "https://as.its-kenpo.or.jp/apply/empty_calendar?s=PT13TjJjVFBrbG1KbFZuYzAxVFp5Vkhkd0YyWWZWR2JuOTJiblpTWjFKSGQ5a0hkdzFXWg%3D%3D&join_date=&night_count=1"
+    # "https://linebottester.github.io/kenpo_test_site/test_calendar.html" # テスト用
+
+    # 施設名と施設IDを取得する　毎回見に行くのはナンセンスな気がする　月初めのみに限定すべきか
+    #　if isfirst == 1 or datetime.today().day == 1:　#　例えばこんな感じとか
+    # isfirst = 0 # 実行後0にする
 
     facilities = scrape_facility_names_ids(facility_url)
-    save_facilities(facilities)
+    save_facilities(facilities) #取得してきた施設と施設IDをDBへ保存
+
+    # 希望されている施設IDと名前をDBから取得してきて
     wished_facilities = fetch_wished_facilities()
 
-    user_notifications = {}
-
-    for wished in wished_facilities:
-        user_id = wished["user_id"]
-        msg = scrape_avl_from_calender(
-            facility_id=wished["facility_id"],
-            facility_name=wished["facility_name"],
-            user_id=user_id,
-            is_manual=False
+    # 希望のある施設のみをスクレイピングする
+    for wished_facility in wished_facilities:
+        scrape_avl_from_calender(
+            facility_id=wished_facility["facility_id"],
+            facility_name=wished_facility["facility_name"],  # 通知、ロガーなどに使うので引数として渡しておく
+            user_id=wished_facility["user_id"]        
         )
-        if msg:
-            user_notifications.setdefault(user_id, []).append(msg)
-
-    if user_notifications:
-        for user_id, messages in user_notifications.items():
-            combined = "\n\n".join(messages)
-            logger.info(f"[通知準備] user_id={user_id} → メッセージ: {combined}")  # ← 追加
-            try:
-                response = line_bot_api.push_message(user_id, TextSendMessage(text=combined))
-                logger.info(f"[通知送信成功] user_id={user_id}, 件数: {len(messages)}")
-            except Exception as e:
-                logger.error(f"[通知送信失敗] user_id={user_id}: {e}")
-    else:
-        logger.info("[定期実行] user_notificationsにメッセージが1件も入っていません")
-
     
 if __name__ == "__main__":
     main()
