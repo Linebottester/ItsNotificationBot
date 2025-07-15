@@ -124,8 +124,7 @@ def handle_text(event):
                 scrape_avl_from_calender(
                     facility_id=wished_facility["facility_id"],
                     facility_name=wished_facility["facility_name"],
-                    user_id=wished_facility["user_id"],
-                    is_manual=True
+                    user_id=wished_facility["user_id"]
                 )
             logger.info("手動スクレイピングが実行されました")
         except Exception as e:

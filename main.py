@@ -16,32 +16,28 @@ logger = logging.getLogger(__name__)
 create_tables()
 
 def main():
-    from line_bot_server import notify_user 
+    
     # 施設の名前とURL一覧を取得
     facility_url = "https://as.its-kenpo.or.jp/apply/empty_calendar?s=PT13TjJjVFBrbG1KbFZuYzAxVFp5Vkhkd0YyWWZWR2JuOTJiblpTWjFKSGQ5a0hkdzFXWg%3D%3D&join_date=&night_count=1"
+    # "https://linebottester.github.io/kenpo_test_site/test_calendar.html" # テスト用
+
+    # 施設名と施設IDを取得する　毎回見に行くのはナンセンスな気がする　月初めのみに限定すべきか
+    #　if isfirst == 1 or datetime.today().day == 1:　#　例えばこんな感じとか
+    # isfirst = 0 # 実行後0にする
+
     facilities = scrape_facility_names_ids(facility_url)
     save_facilities(facilities) #取得してきた施設と施設IDをDBへ保存
 
     # 希望されている施設IDと名前をDBから取得してきて
     wished_facilities = fetch_wished_facilities()
-    messages_each_user = {} 
 
     # 希望のある施設のみをスクレイピングする
     for wished_facility in wished_facilities:
-        user_id = wished_facility["user_id"]
-        message = scrape_avl_from_calender(
+        scrape_avl_from_calender(
             facility_id=wished_facility["facility_id"],
-            facility_name=wished_facility["facility_name"],
-            user_id=user_id,
-            is_manual=False  # 定期実行
+            facility_name=wished_facility["facility_name"],  # 通知、ロガーなどに使うので引数として渡しておく
+            user_id=wished_facility["user_id"]        
         )
-        if message:
-            messages_each_user.setdefault(user_id, []).append(message)
-
-    # 通知をユーザー単位でまとめて送信
-    for user_id, msg_list in messages_each_user.items():
-        full_message = "\n\n".join(msg_list)
-        notify_user(user_id, full_message)
     
 if __name__ == "__main__":
     main()
