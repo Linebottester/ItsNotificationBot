@@ -16,7 +16,8 @@ from db_utils import (
     remove_user_from_db,cancell_user_selection,
     fetch_user_wished_facilities_for_cancel
 )
-
+from datetime import datetime, timedelta
+import threading
 import os
 import logging
 import threading
@@ -42,14 +43,39 @@ handler = WebhookHandler(channel_secret)
 
 # main.py定期実行用関数
 def periodic_check():
+    """0:05と12:05に実行する関数"""
     while True:
+        now = datetime.now()
+        
+        # === 元のコード（本番用）===
+        # if now.hour < 12 and (now.hour > 0 or now.minute >= 5):
+        #     # 12:05まで待つ
+        #     next_run = now.replace(hour=12, minute=5, second=0, microsecond=0)
+        # elif now.hour >= 12 and (now.hour > 12 or now.minute >= 5):
+        #     # 明日の0:05まで待つ
+        #     tomorrow = now + timedelta(days=1)
+        #     next_run = tomorrow.replace(hour=0, minute=5, second=0, microsecond=0)
+        # else:
+        #     # 今日の0:05まで待つ
+        #     next_run = now.replace(hour=0, minute=5, second=0, microsecond=0)
+        
+        # === テスト用（現在時刻の1分後）===
+        next_run = now + timedelta(minutes=2)
+        
+        # 待機時間を計算
+        wait_seconds = (next_run - now).total_seconds()
+        
+        logger.info(f"次回実行: {next_run.strftime('%H:%M')} (約{wait_seconds/60:.0f}分後)")
+        
+        # 待機
+        time.sleep(wait_seconds)
+        
+        # 実行
         try:
-            main() 
-            logger.info("定期スクレイピングが実行されました")
+            main()  # あなたのmain関数を呼び出し
+            logger.info("定期実行完了")
         except Exception as e:
-            logger.error(f"定期処理エラー: {e}")
-        time.sleep(8 * 60 * 60)  # 8時間待つ
-        # time.sleep(60)  # 60秒待つ（テスト用）
+            logger.error(f"実行エラー: {e}")
 
 # 定期実行スレッドの起動
 threading.Thread(target=periodic_check, daemon=True).start()
@@ -127,7 +153,7 @@ def handle_text(event):
     
         wished_facilities = wished_facilities = fetch_user_wished_facilities_for_cancel(user_id)
         if not wished_facilities:
-            line_bot_api.reply_message(event.reply_token, TextSendMessage(text="解除できる施設がありません。「希望」と入力して登録をおこなってください"))
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(text="解除できる施設がありません。「登録」と入力して登録をおこなってください"))
             return
 
         flex = show_cancell_flex(wished_facilities)
@@ -138,7 +164,7 @@ def handle_text(event):
         try:
             wished_facilities = fetch_wished_facilities()
             if not wished_facilities:
-                reply = "希望施設が登録されていません。先に「希望」と入力して登録をしてください。"
+                reply = "希望施設が登録されていません。先に「登録」と入力して登録をしてください。"
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply))
                 return
 
