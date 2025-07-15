@@ -105,27 +105,6 @@ def extract_available_dates(soup, facility_id):
                 logger.debug(f"満室: {facility_id} {join_date} 状態: {status_text}")
     return available_dates
 
-def notify_user_batch(notifications):
-    from line_bot_server import notify_user
-
-    for note in notifications:
-        facility_name = note["facility_name"]
-        date_list = note["date_list"]
-        calendar_url = note["calendar_url"]
-        user_id = note["user_id"]
-
-        if not date_list:
-            text = f"{facility_name}には現在予約可能な日程がありません。"
-        else:
-            formatted = []
-            for date_str in date_list:
-                dt = datetime.strptime(date_str, "%Y-%m-%d")
-                weekday = "月火水木金土日"[dt.weekday()]
-                formatted.append(f"{dt.month}月{dt.day}日（{weekday}）")
-            text = f"{facility_name}の次の日程に空きがあります。\n" + "、".join(formatted) + f"\n\n予約ページはこちら：{calendar_url}"
-
-        notify_user(user_id, text)
-        logger.info(f"[通知] {facility_name} → {text}")
 
 
 

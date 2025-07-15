@@ -5,6 +5,7 @@ from db_utils import save_facilities
 from db_utils import fetch_wished_facilities
 from scraper import scrape_facility_names_ids
 from scraper import scrape_avl_from_calender
+from line_bot_server import stack_notify
 
 import logging
 
@@ -39,6 +40,7 @@ def main():
         )
         
         notifications.append(result)
-    
+        stack_notify(notifications)
+
 if __name__ == "__main__":
     main()
