@@ -2,7 +2,7 @@ name: Daily Vacancy Check Trigger
 
 on:
   schedule:
-    - cron: '45 6,3 * * *'  # JSTで 0:05 と 12:05（UTC換算）
+    - cron: '48 6,3 * * *'  # JSTで 0:05 と 12:05（UTC換算）
 
 jobs:
   trigger-scraping:
