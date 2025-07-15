@@ -79,15 +79,10 @@ def scrape_avl_from_calender(facility_id, facility_name, user_id):
 
         except requests.RequestException as e:
             logger.error(f"{target_year}年{target_month}月の施設名:{facility_name}, 施設ID:{facility_id} の取得に失敗: {e}")
-    
-    # データを返して呼び出し先で詰める
-    return {
-        "facility_id": facility_id,
-        "facility_name": facility_name,
-        "user_id": user_id,
-        "date_list": sorted(all_available_dates),
-        "calendar_url": f"https://as.its-kenpo.or.jp/apply/empty_calendar?s={facility_id}"
-    }
+
+    # 全体の空き日をまとめて通知
+    calendar_url = f"https://as.its-kenpo.or.jp/apply/empty_calendar?s={facility_id}"
+    notify_user_about_dates(sorted(all_available_dates), facility_name, facility_id, user_id, calendar_url)
 
 def extract_available_dates(soup, facility_id):
     logger = logging.getLogger(__name__)
@@ -105,7 +100,29 @@ def extract_available_dates(soup, facility_id):
                 logger.debug(f"満室: {facility_id} {join_date} 状態: {status_text}")
     return available_dates
 
+def notify_user_about_dates(date_list, facility_name, facility_id, user_id, calendar_url):
+    from line_bot_server import notify_user
+    logger = logging.getLogger(__name__)
 
+    if not date_list:
+        notify_text = f"{facility_name}には現在予約可能な日程がありません。"
+        notify_user(user_id, notify_text)
+        logger.info(f"{facility_id} に空きなし通知を送信 → {notify_text}")
+        return
+
+    formatted_dates = []
+    for date_str in date_list:
+        dt = datetime.strptime(date_str, "%Y-%m-%d")
+        weekday = "月火水木金土日"[dt.weekday()]
+        formatted_dates.append(f"{dt.month}月{dt.day}日（{weekday}）")
+
+    notify_text = (
+        f"{facility_name}の次の日程に空きがあります。\n"
+        + "、".join(formatted_dates)
+        + f"\n\n予約ページはこちら：{calendar_url}"
+    )
+    notify_user(user_id, notify_text)
+    logger.info(f"{facility_id} に空き通知を送信 → {notify_text}")
 
 
 
