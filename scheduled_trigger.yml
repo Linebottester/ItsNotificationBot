@@ -10,4 +10,4 @@ jobs:
 
     steps:
       - name: Send trigger to Render
-        run: curl -X GET https://itsnotificationbot.onrender.com/trigger_scrape?token=z0eg50_KaP0xXa1oOrT8hU
+        run: curl -X GET "https://itsnotificationbot.onrender.com/trigger_scrape?token=${{ secrets.SCRAPER_TRIGGER_TOKEN }}"
