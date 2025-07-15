@@ -46,7 +46,7 @@ def periodic_check():
     """0:05と12:05に実行する関数"""
     while True:
         now = datetime.now()
-        """
+        
         # ===（本番用）===
         if now.hour < 12 and (now.hour > 0 or now.minute >= 5):
             # 12:05まで待つ
@@ -59,10 +59,10 @@ def periodic_check():
         else:
             # 今日の0:05まで待つ
             next_run = now.replace(hour=0, minute=5, second=0, microsecond=0)
-        """
+        
         
         # === テスト用（現在時刻の1分後）===
-        next_run = now + timedelta(minutes=1)
+        #next_run = now + timedelta(minutes=1)
         
         # 待機時間を計算
         wait_seconds = (next_run - now).total_seconds()
