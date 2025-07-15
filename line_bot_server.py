@@ -133,7 +133,7 @@ def handle_text(event):
                 combined = "\n\n".join(notifications)
             else:
                 combined = "希望施設に空きはありませんでした。"
-
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(text=combined))
             logger.info("手動スクレイピングが実行されました")
         except Exception as e:
             logger.error(f"手動処理エラー: {e}")

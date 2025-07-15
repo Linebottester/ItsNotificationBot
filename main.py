@@ -36,7 +36,8 @@ def main():
         scrape_avl_from_calender(
             facility_id=wished_facility["facility_id"],
             facility_name=wished_facility["facility_name"],  # 通知、ロガーなどに使うので引数として渡しておく
-            user_id=wished_facility["user_id"]        
+            user_id=wished_facility["user_id"],
+            is_manual=False     
         )
     
 if __name__ == "__main__":
