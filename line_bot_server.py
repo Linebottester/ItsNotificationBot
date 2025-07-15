@@ -4,6 +4,7 @@ from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 from main import main
 from datetime import datetime
+from collections import defaultdict
 from linebot import LineBotApi, WebhookHandler
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
@@ -203,8 +204,9 @@ def notify_user(user_id: str, message: str):
     except Exception as e:
         logger.error(f"LINE通知送信エラー: {e}")
 
-# 通知情報を蓄積してメッセージを一つにまとめる
 def stack_notify(notifications):
+    
+    messages_by_user = defaultdict(list)
 
     for note in notifications:
         facility_name = note["facility_name"]
@@ -212,18 +214,24 @@ def stack_notify(notifications):
         calendar_url = note["calendar_url"]
         user_id = note["user_id"]
 
-        if not date_list:
-            text = f"{facility_name}には現在予約可能な日程がありません。"
-        else:
+        if date_list:
             formatted = []
             for date_str in date_list:
                 dt = datetime.strptime(date_str, "%Y-%m-%d")
                 weekday = "月火水木金土日"[dt.weekday()]
                 formatted.append(f"{dt.month}月{dt.day}日（{weekday}）")
-            text = f"{facility_name}の次の日程に空きがあります。\n" + "、".join(formatted) + f"\n\n予約ページはこちら：{calendar_url}"
 
-        notify_user(user_id, text)
-        logger.info(f"[通知] {facility_name} → {text}")
+            entry = f"{facility_name}：\n" + "、".join(formatted) + f"\n予約ページはこちら：\n{calendar_url}"
+            messages_by_user[user_id].append(entry)
+
+    for user_id, entries in messages_by_user.items():
+        if entries:
+            combined = "\n\n".join(entries)
+            header = "以下の施設に空きがあります。\n\n"
+            notify_user(user_id, header + combined)
+        else:
+            notify_user(user_id, "現在予約可能な日程はありません。")
+
 
 # Flask起動
 if __name__ == "__main__":
