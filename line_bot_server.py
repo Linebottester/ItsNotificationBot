@@ -13,7 +13,8 @@ from scraper import scrape_avl_from_calender
 from db_utils import (
     get_items_from_db, save_followed_userid,
     register_user_selection,fetch_wished_facilities,
-    remove_user_from_db,cancell_user_selection
+    remove_user_from_db,cancell_user_selection,
+    fetch_user_wished_facilities_for_cancel
 )
 
 import os
@@ -113,9 +114,9 @@ def handle_text(event):
     
     if text == "解除":
     
-        wished_facilities = fetch_wished_facilities(user_id)  # ユーザーごとのデータだけ取得
+        wished_facilities = fetch_user_wished_facilities_for_cancel 
         if not wished_facilities:
-            line_bot_api.reply_message(event.reply_token, TextSendMessage(text="解除できる施設がありません。"))
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(text="解除できる施設がありません。「希望」と入力して登録をおこなってください"))
             return
 
         flex = show_cancell_flex(wished_facilities)

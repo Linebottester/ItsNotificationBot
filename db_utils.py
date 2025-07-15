@@ -133,6 +133,20 @@ def fetch_wished_facilities():
     except Exception as e:
         logger.error(f"予期しないエラー: {e}")
         return []
+    
+# 登録解除時に使用するデータをとってくる
+def fetch_user_wished_facilities_for_cancel(user_id):
+    logger.info(f"[解除取得開始] user_id={user_id} の希望施設を取得します")
+
+    all = fetch_wished_facilities()
+    user_facilities = [item for item in all if item['user_id'] == user_id]
+
+    logger.info(f"[解除対象取得完了] user_id={user_id}, 件数={len(user_facilities)}")
+    for item in user_facilities:
+        logger.debug(f"解除候補施設: {item['facility_name']} (ID={item['facility_id']})")
+
+    return user_facilities
+
 
 # ユーザーがボットをフォローしたときそのIDをusersテーブルに保存
 def save_followed_userid(userid):
