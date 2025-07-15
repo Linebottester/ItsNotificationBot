@@ -54,6 +54,15 @@ def periodic_check():
 # 定期実行スレッドの起動
 threading.Thread(target=periodic_check, daemon=True).start()
 
+# gitActionsからCURLを受けて定期実行を行うエンドポイント
+@app.route('/trigger_scrape', methods=['GET'])
+def trigger_scrape():
+    try:
+        main()  # 空き確認関数など
+        return "Triggered successfully", 200
+    except Exception as e:
+        logger.error(f"Manual trigger error: {e}")
+        return "Trigger failed", 500
 
 # 共通エンドポイント：ヘルスチェック
 @app.route("/", methods=["GET"])
@@ -85,8 +94,10 @@ def handle_follow(event):
         
         welcome_message = (
             "フォローありがとうございます！\n"
-            "希望施設を登録したいときは「希望」、\n"
-            "予約状況を確認したいときは「確認」と送ってください😊"
+            "希望施設を登録したいときは「登録」、\n"
+            "予約状況を確認したいときは「空き確認」、\n"
+            "登録施設を解除したいときは「解除」、\n"
+            "このボットの説明やコマンド確認したいときは「ヘルプ」と送ってください😊"   
         )
         
         line_bot_api.reply_message(
@@ -107,7 +118,7 @@ def handle_text(event):
     user_id = event.source.user_id
     text = event.message.text.strip()
 
-    if text == "希望":
+    if text == "登録":
         flex = show_selection_flex()
         line_bot_api.reply_message(event.reply_token, flex)
         return
@@ -123,7 +134,7 @@ def handle_text(event):
         line_bot_api.reply_message(event.reply_token, flex)
         return
 
-    if text == "確認":
+    if text == "空き確認":
         try:
             wished_facilities = fetch_wished_facilities()
             if not wished_facilities:
@@ -150,9 +161,30 @@ def handle_text(event):
         except Exception as e:
             logger.error(f"手動処理エラー: {e}")
         return
+    
+    if text == "ヘルプ":
+        logger.info(f"[ヘルプ表示開始] user_id={user_id} がヘルプの要求を受信")
 
-    # どちらにも当てはまらない場合
-    reply = "施設を選ぶには「希望」、予約状況を確認するには「確認」と入力してください。"
+        help_text = (
+            "■コマンド一覧\n"
+            "・登録：空き確認をしたい施設を登録します\n"
+            "・解除：登録済み施設を解除します\n"
+            "・空き確認：現在の空き状況をすぐに確認します\n"
+            "・ヘルプ：このボットの使い方を表示します\n\n"
+            "■定期空き確認\n"
+            "毎日 0:05、12:05 に自動チェックします\n\n"
+            "■注意\n"
+            "このアカウントをブロックすると施設の登録がすべて解除されます"
+        )
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=help_text))
+        logger.info(f"[ヘルプ送信完了] user_id={user_id} にヘルプ内容を送信しました")
+        return
+
+    
+    
+
+    # いずれにも当てはまらない場合
+    reply = "施設を選ぶには「希望」、予約状況を確認するには「空き確認」と入力してください。"
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply))
 
 @handler.add(PostbackEvent)
