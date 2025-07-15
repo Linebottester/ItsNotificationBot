@@ -9,7 +9,7 @@ from linebot.models import (
     FlexSendMessage, PostbackEvent, FollowEvent, UnfollowEvent
 )
 from linebot.exceptions import InvalidSignatureError
-from scraper import scrape_avl_from_calender_unified
+from scraper import scrape_avl_from_calender
 from db_utils import (
     get_items_from_db, save_followed_userid,
     register_user_selection,fetch_wished_facilities,
@@ -121,7 +121,7 @@ def handle_text(event):
                 return
 
             for wished_facility in wished_facilities:
-                scrape_avl_from_calender_unified(
+                scrape_avl_from_calender(
                     facility_id=wished_facility["facility_id"],
                     facility_name=wished_facility["facility_name"],
                     user_id=wished_facility["user_id"]

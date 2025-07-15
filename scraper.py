@@ -123,56 +123,7 @@ def notify_user_about_dates(date_list, facility_name, facility_id, user_id, cale
     )
     notify_user(user_id, notify_text)
     logger.info(f"{facility_id} に空き通知を送信 → {notify_text}")
-    
-def scrape_avl_from_calender_unified(facility_id, facility_name, user_id):
-    """
-    統合通知用のスクレイピング関数
-    結果を辞書形式で返し、通知は呼び出し元で行う
-    """
-    logger.info(f"[関数呼び出し] scrape_avl_from_calender_unified → facility_id={facility_id}, name={facility_name}, user_id={user_id}")
-    
-    today = datetime.now()
-    base_date = today.replace(day=1)
-    all_available_dates = set()  # 重複排除のため set を使用
 
-    for i in range(3):
-        first_day = base_date + relativedelta(months=i)
-        target_year = first_day.year
-        target_month = first_day.month
-
-        logger.info(f"[{facility_name}] {target_year}年{target_month}月 スクレイピング開始")
-        
-        base_url = "https://as.its-kenpo.or.jp/apply/empty_calendar" # 本番用
-
-        params = {
-            's': facility_id,
-            'join_date': first_day,
-            'night_count':''
-        }
-
-        try:
-            response = requests.get(base_url, params=params)
-            response.raise_for_status()
-            logger.info(f"{target_year}年{target_month}月の施設名:{facility_name}, 施設ID:{facility_id}に対するページ取得成功")
-            soup = BeautifulSoup(response.content, "html.parser")
-
-            # 月単位の空き日を抽出し、重複排除セットに追加
-            dates = extract_available_dates(soup, facility_id)
-            all_available_dates.update(dates)
-
-        except requests.RequestException as e:
-            logger.error(f"{target_year}年{target_month}月の施設名:{facility_name}, 施設ID:{facility_id} の取得に失敗: {e}")
-
-    # 結果を辞書形式で返す（通知はしない）
-    result = {
-        'facility_id': facility_id,
-        'facility_name': facility_name,
-        'user_id': user_id,
-        'available_dates': sorted(all_available_dates)
-    }
-    
-    logger.info(f"[{facility_name}] スクレイピング完了: {len(all_available_dates)}件の空き日を発見")
-    return result
 
 
         
