@@ -114,7 +114,7 @@ def handle_text(event):
     
     if text == "解除":
     
-        wished_facilities = fetch_user_wished_facilities_for_cancel 
+        wished_facilities = wished_facilities = fetch_user_wished_facilities_for_cancel(user_id)
         if not wished_facilities:
             line_bot_api.reply_message(event.reply_token, TextSendMessage(text="解除できる施設がありません。「希望」と入力して登録をおこなってください"))
             return
