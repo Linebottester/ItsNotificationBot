@@ -62,7 +62,7 @@ def periodic_check():
         """
         
         # === テスト用（現在時刻の1分後）===
-        next_run = now + timedelta(minutes=2)
+        next_run = now + timedelta(minutes=1)
         
         # 待機時間を計算
         wait_seconds = (next_run - now).total_seconds()
@@ -74,7 +74,7 @@ def periodic_check():
         
         # 実行
         try:
-            main()  # あなたのmain関数を呼び出し
+            main()  # main関数を呼び出し
             logger.info("定期実行完了")
         except Exception as e:
             logger.error(f"実行エラー: {e}")
