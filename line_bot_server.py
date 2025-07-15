@@ -67,7 +67,7 @@ def periodic_check():
         # 待機時間を計算
         wait_seconds = (next_run - now).total_seconds()
         
-        logger.info(f"次回実行: {next_run.strftime('%H:%M')} (約{wait_seconds/60:.0f}分後)")
+        # logger.info(f"次回実行: {next_run.strftime('%H:%M')} (約{wait_seconds/60:.0f}分後)")
         
         # 待機
         time.sleep(wait_seconds)
