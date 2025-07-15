@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger(__name__)
 
 # サービス起動時に1回だけ実行　各テーブルを作成
-create_tables()
+# create_tables()
 
 def main():
     

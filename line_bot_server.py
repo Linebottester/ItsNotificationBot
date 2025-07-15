@@ -39,8 +39,7 @@ if not channel_access_token or not channel_secret:
 line_bot_api = LineBotApi(channel_access_token)
 handler = WebhookHandler(channel_secret)
 
-# main.py定期実行用関数 開発中につき停止
-
+# main.py定期実行用関数
 def periodic_check():
     while True:
         try:
@@ -120,12 +119,21 @@ def handle_text(event):
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply))
                 return
 
+            notifications = []
             for wished_facility in wished_facilities:
-                scrape_avl_from_calender(
+                notification = scrape_avl_from_calender(
                     facility_id=wished_facility["facility_id"],
                     facility_name=wished_facility["facility_name"],
-                    user_id=wished_facility["user_id"]
+                    user_id=wished_facility["user_id"],
+                    is_manual=True
                 )
+                if notification:
+                    notifications.append(notification)
+            if notifications:
+                combined = "\n\n".join(notifications)
+            else:
+                combined = "希望施設に空きはありませんでした。"
+
             logger.info("手動スクレイピングが実行されました")
         except Exception as e:
             logger.error(f"手動処理エラー: {e}")
@@ -134,7 +142,6 @@ def handle_text(event):
     # どちらにも当てはまらない場合
     reply = "施設を選ぶには「希望」、予約状況を確認するには「確認」と入力してください。"
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply))
-
 
 @handler.add(PostbackEvent)
 def handle_postback(event):

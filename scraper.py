@@ -41,7 +41,7 @@ def scrape_facility_names_ids(url):
     logger.info(f'抽出完了: {len(facilities)} 件の施設を取得しました')
     return facilities
 
-def scrape_avl_from_calender(facility_id, facility_name, user_id):
+def scrape_avl_from_calender(facility_id, facility_name, user_id, is_manual):
     logger.info(f"[関数呼び出し] scrape_avl_from_calender → facility_id={facility_id}, name={facility_name}, user_id={user_id}")
     
     today = datetime.now()
@@ -82,7 +82,22 @@ def scrape_avl_from_calender(facility_id, facility_name, user_id):
 
     # 全体の空き日をまとめて通知
     calendar_url = f"https://as.its-kenpo.or.jp/apply/empty_calendar?s={facility_id}"
-    notify_user_about_dates(sorted(all_available_dates), facility_name, facility_id, user_id, calendar_url)
+
+    if not all_available_dates:
+        if is_manual:
+            return f"{facility_name}には現在予約可能な日程がありません。"
+        return "" #　定期処理
+    
+    formatted_dates = [
+        f"{datetime.strptime(d, '%Y-%m-%d').month}月{datetime.strptime(d, '%Y-%m-%d').day}日（{'月火水木金土日'[datetime.strptime(d, '%Y-%m-%d').weekday()]})"
+        for d in sorted(all_available_dates)
+    ]
+
+    return (
+        f"{facility_name}の次の日程に空きがあります。\n"
+        + "、".join(formatted_dates)
+        + f"\n\n予約ページはこちら：{calendar_url}"
+    )
 
 def extract_available_dates(soup, facility_id):
     logger = logging.getLogger(__name__)

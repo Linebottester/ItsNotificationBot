@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger(__name__)
 
 # 初回起動時にfacilities,users,user_wishesテーブルを作成する
-def create_tables():
+def create_tables(): # テーブル作成済なので呼ばれないが構造把握のために残す
     if not database_url:
         logger.error("DATABASE_URL環境変数が設定されていません")
         return
