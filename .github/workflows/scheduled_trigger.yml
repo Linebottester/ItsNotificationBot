@@ -1,0 +1,13 @@
+name: Daily Vacancy Check Trigger
+
+on:
+  schedule:
+    - cron: '5 15,8 * * *'  # JSTで0:05 & 12:05
+
+jobs:
+  trigger-scraping:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger vacancy check
+        run: curl -X GET "https://itsnotificationbot.onrender.com/trigger_scrape?token=${{ secrets.SCRAPER_TRIGGER_TOKEN }}"
