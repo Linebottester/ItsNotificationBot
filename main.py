@@ -41,13 +41,14 @@ def main():
     if user_notifications:
         for user_id, messages in user_notifications.items():
             combined = "\n\n".join(messages)
+            logger.info(f"[通知準備] user_id={user_id} → メッセージ: {combined}")  # ← 追加
             try:
-                line_bot_api.push_message(user_id, TextSendMessage(text=combined))
-                logger.info(f"[定期通知] user_id={user_id} に送信成功: {len(messages)}件")
+                response = line_bot_api.push_message(user_id, TextSendMessage(text=combined))
+                logger.info(f"[通知送信成功] user_id={user_id}, 件数: {len(messages)}")
             except Exception as e:
-                logger.error(f"[通知失敗] user_id={user_id}: {e}")
+                logger.error(f"[通知送信失敗] user_id={user_id}: {e}")
     else:
-        logger.info("[定期実行] 空き無し。通知は行われません")
+        logger.info("[定期実行] user_notificationsにメッセージが1件も入っていません")
 
     
 if __name__ == "__main__":

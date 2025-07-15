@@ -89,9 +89,6 @@ def scrape_avl_from_calender(facility_id, facility_name, user_id, is_manual):
         else:
             logger.info(f" 定期実行：空きなし → facility_name={facility_name}, user_id={user_id}")
             return ""
-
-
-        return "" #　定期処理
     
     formatted_dates = [
         f"{datetime.strptime(d, '%Y-%m-%d').month}月{datetime.strptime(d, '%Y-%m-%d').day}日（{'月火水木金土日'[datetime.strptime(d, '%Y-%m-%d').weekday()]})"
