@@ -2,7 +2,7 @@ name: Daily Vacancy Check Trigger
 
 on:
   schedule:
-    - cron: '1 8 * * *'  # UTC 08:01 → JST 17:01 実行
+    - cron: '18 8 * * *'  # UTC 08:01 → JST 17:01 実行
   workflow_dispatch:     # 手動実行も可能にする（テスト用）
 
 jobs:
