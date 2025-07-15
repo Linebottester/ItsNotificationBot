@@ -202,7 +202,6 @@ def handle_unfollow(event):
     # DBからユーザー情報を削除する処理をここに書く
     remove_user_from_db(user_id)
 
-
 # Flask起動
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

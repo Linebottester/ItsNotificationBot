@@ -22,8 +22,6 @@ def main():
     # "https://linebottester.github.io/kenpo_test_site/test_calendar.html" # テスト用
 
     # 施設名と施設IDを取得する　毎回見に行くのはナンセンスな気がする　月初めのみに限定すべきか
-    #　if isfirst == 1 or datetime.today().day == 1:　#　例えばこんな感じとか
-    # isfirst = 0 # 実行後0にする
 
     facilities = scrape_facility_names_ids(facility_url)
     save_facilities(facilities) #取得してきた施設と施設IDをDBへ保存
@@ -31,13 +29,16 @@ def main():
     # 希望されている施設IDと名前をDBから取得してきて
     wished_facilities = fetch_wished_facilities()
 
+    notifications = []
     # 希望のある施設のみをスクレイピングする
     for wished_facility in wished_facilities:
-        scrape_avl_from_calender(
+        result = scrape_avl_from_calender(
             facility_id=wished_facility["facility_id"],
             facility_name=wished_facility["facility_name"],  # 通知、ロガーなどに使うので引数として渡しておく
             user_id=wished_facility["user_id"]        
         )
+        
+        notifications.append(result)
     
 if __name__ == "__main__":
     main()
