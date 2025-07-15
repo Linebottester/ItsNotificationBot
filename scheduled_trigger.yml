@@ -1,0 +1,13 @@
+name: Daily Vacancy Check Trigger
+
+on:
+  schedule:
+    - cron: '30 18,3 * * *'  # JSTで 0:05 と 12:05（UTC換算）
+
+jobs:
+  trigger-scraping:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send trigger to Render
+        run: curl -X GET https://itsnotificationbot.onrender.com/trigger_scrape?token=z0eg50_KaP0xXa1oOrT8hU
