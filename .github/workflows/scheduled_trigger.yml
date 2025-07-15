@@ -2,12 +2,23 @@ name: Daily Vacancy Check Trigger
 
 on:
   schedule:
-    - cron: '1 15,8 * * *'  # JSTで0:05 & 12:05
+    - cron: '1 8 * * *'  # UTC 08:01 → JST 17:01 実行
+  workflow_dispatch:     # 手動実行も可能にする（テスト用）
 
 jobs:
   trigger-scraping:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check if token is loaded
+        run: |
+          if [ -z "${{ secrets.SCRAPER_TRIGGER_TOKEN }}" ]; then
+            echo "❌ SCRAPER_TRIGGER_TOKEN is EMPTY"
+          else
+            echo "✅ SCRAPER_TRIGGER_TOKEN is SET"
+          fi
+
       - name: Trigger vacancy check
-        run: curl -X GET "https://itsnotificationbot.onrender.com/trigger_scrape?token=${{ secrets.SCRAPER_TRIGGER_TOKEN }}"
+        env:
+          TOKEN: ${{ secrets.SCRAPER_TRIGGER_TOKEN }}
+        run: curl -s -X GET "https://itsnotificationbot.onrender.com/trigger_scrape?token=$TOKEN"
