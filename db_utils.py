@@ -203,7 +203,7 @@ def register_user_selection(user_id, facility_id):
                     INSERT INTO user_wishes (user_id, facility_id)
                     VALUES (%s, %s)
                     ON CONFLICT(user_id, facility_id)
-                    DO UPDATE SET created_at = CURRENT_TIMESTAMP
+                    DO NOTHING
                 """, (user_id, facility_id))
 
                 conn.commit()
@@ -266,4 +266,18 @@ def remove_user_from_db(user_id):
         logger.error(f"[DBエラー] 削除処理失敗: user_id={user_id} - 内容: {e}")
     except Exception as e:
         logger.error(f"[予期しないエラー] 削除処理失敗: user_id={user_id} - 内容: {e}")
+
+#　施設個別の登録解除関数
+def cancell_user_selection(user_id, facility_id):
+    try:
+        with psycopg2.connect(database_url) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    DELETE FROM user_wishes
+                    WHERE user_id = %s AND facility_id = %s
+                """, (user_id, facility_id))
+                conn.commit()
+                logger.info(f"[解除成功] user_id={user_id} から facility_id={facility_id} を削除")
+    except Exception as e:
+        logger.error(f"[解除失敗] user_id={user_id}, facility_id={facility_id} - {e}")
 

@@ -13,7 +13,7 @@ from scraper import scrape_avl_from_calender
 from db_utils import (
     get_items_from_db, save_followed_userid,
     register_user_selection,fetch_wished_facilities,
-    remove_user_from_db
+    remove_user_from_db,cancell_user_selection
 )
 
 import os
@@ -110,6 +110,17 @@ def handle_text(event):
         flex = show_selection_flex()
         line_bot_api.reply_message(event.reply_token, flex)
         return
+    
+    if text == "解除":
+    
+        wished_facilities = fetch_wished_facilities(user_id)  # ユーザーごとのデータだけ取得
+        if not wished_facilities:
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(text="解除できる施設がありません。"))
+            return
+
+        flex = show_cancell_flex(wished_facilities)
+        line_bot_api.reply_message(event.reply_token, flex)
+        return
 
     if text == "確認":
         try:
@@ -155,6 +166,14 @@ def handle_postback(event):
         logger.info(f"[希望登録完了] user={user_id}, facility={facility_id}")
         line_bot_api.reply_message(event.reply_token,
             TextSendMessage(text=f"{facility_name} を予約希望施設として登録しました！\n続けて確認したいときは「確認」と入力してください"))
+        
+    if data.startswith("cancel_item_"):
+        facility_id = data.replace("cancel_item_", "")
+        facility_name = next((item["name"] for item in get_items_from_db() if item["id"] == facility_id), None)
+        cancell_user_selection(user_id, facility_id)
+        logger.info(f"[希望解除完了] user={user_id}, facility={facility_id}")
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f"{facility_name} を希望リストから解除しました\n通知は届かなくなるのでご注意ください"))
+            
 
 # Flex Message生成
 def show_selection_flex():
@@ -182,6 +201,33 @@ def show_selection_flex():
             }
         }
     )
+
+def show_cancell_flex(wished_facilities):
+    contents = [{
+        "type": "button",
+        "action": {
+            "type": "postback",
+            "label": item["facility_name"],
+            "data": f"cancel_item_{item['facility_id']}"
+        },
+        "style": "primary",
+        "color": "#FF6666"
+    } for item in wished_facilities]
+
+    return FlexSendMessage(
+        alt_text="登録解除する施設を選択してください",
+        contents={
+            "type": "bubble",
+            "body": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                    {"type": "text", "text": "登録解除する施設を選んでください", "weight": "bold", "size": "lg"}
+                ] + contents
+            }
+        }
+    )
+
 
 # 通知希望者に通知を送る
 def notify_user(user_id: str, message: str):
